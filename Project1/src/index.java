@@ -31,6 +31,9 @@ public class index extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Session s;
 	private String metadata = "1a";
+	private static final int cookieAge = 60 * 10;
+	private static final int sessionAge = 60 * 10 * 10;
+	private static final String cookieName = "CS5300PROJ1SESSION";
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	HashMap<String, Session> sessionInfo = new HashMap<>();
        
@@ -80,14 +83,14 @@ public class index extends HttpServlet {
 		if(cookies != null){
 			for(Cookie cookie : cookies){
 				String sId = cookie.getValue().split("__")[0];
-				if(cookie.getName().equals("CS5300") && sessionInfo.containsKey(sId)){
+				if(cookie.getName().equals(cookieName) && sessionInfo.containsKey(sId)){
 					Date date = new Date();
 					Timestamp now = new Timestamp(date.getTime());	
 					
 					//double check the session is timeout
 					if(now.before(sessionInfo.get(sId).getTimeout())){
 						Long time = date.getTime();
-						sessionInfo.get(sId).setTimeout(new Timestamp(time + 60*60*10));
+						sessionInfo.get(sId).setTimeout(new Timestamp(time + sessionAge));
 						sessionInfo.get(sId).setBegin(new Timestamp(time));
 						sessionInfo.get(sId).setVersion(sessionInfo.get(sId).getVersion()+1);
 						s = sessionInfo.get(sId);
@@ -105,7 +108,7 @@ public class index extends HttpServlet {
 		if(newbee != false){
 			String sessionID = UUID.randomUUID().toString();
 			int version = 1;
-			s = new Session(sessionID, version, "Hello world", 60*60*10); 
+			s = new Session(sessionID, version, "Hello world", sessionAge); 
 			sessionInfo.put(sessionID, s);
 	    }
 		
@@ -126,12 +129,12 @@ public class index extends HttpServlet {
 	    	PrintWriter out = response.getWriter();
 	    	String output = readFile(s); 
 	    
-	    	Cookie sessionCookie = new Cookie("CS5300", s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
+	    	Cookie sessionCookie = new Cookie(cookieName, s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
 	    	
 	    	output = output.replace("#cookieId#", sessionCookie.getValue());
 	    	out.println(output);
 			
-	    	sessionCookie.setMaxAge(60*10);
+	    	sessionCookie.setMaxAge(cookieAge);
 			response.setContentType("text/html"); 
 			response.addCookie(sessionCookie);
 	    }
@@ -143,12 +146,12 @@ public class index extends HttpServlet {
     	String output = readFile(s); 
     	
     	
-    	Cookie sessionCookie = new Cookie("CS5300", s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
+    	Cookie sessionCookie = new Cookie(cookieName, s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
     	
     	output = output.replace("#cookieId#", sessionCookie.getValue());
     	out.println(output);
     	
-		sessionCookie.setMaxAge(60*10);
+		sessionCookie.setMaxAge(cookieAge);
 		response.setContentType("text/html"); 
 		response.addCookie(sessionCookie);		 	 
 	}
@@ -163,7 +166,7 @@ public class index extends HttpServlet {
     	String output = readFile(s); 
     	
     	
-    	Cookie sessionCookie = new Cookie("CS5300", "");
+    	Cookie sessionCookie = new Cookie(cookieName, "");
     	output = output.replace("#cookieId#", sessionCookie.getValue());
     	
     	out.println(output);
@@ -180,14 +183,14 @@ public class index extends HttpServlet {
 		
 		String output = readFile(s); 
     	
-		Cookie sessionCookie = new Cookie("CS5300", s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
+		Cookie sessionCookie = new Cookie(cookieName, s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
     	
 		output = output.replace("#cookieId#", sessionCookie.getValue());
     	
     	PrintWriter out = response.getWriter();
     	out.println(output);
     	
-    	sessionCookie.setMaxAge(60*10);
+    	sessionCookie.setMaxAge(sessionAge);
 		response.setContentType("text/html"); 
 		response.addCookie(sessionCookie);
 		

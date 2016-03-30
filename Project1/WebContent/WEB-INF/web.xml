@@ -12,7 +12,7 @@
     
 <servlet>
     <servlet-name>index</servlet-name>
-    <servlet-class>p1.index</servlet-class>
+    <servlet-class>index</servlet-class>
 </servlet>
 
 <servlet-mapping>

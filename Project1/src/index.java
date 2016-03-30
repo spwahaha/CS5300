@@ -83,23 +83,35 @@ public class index extends HttpServlet {
 		boolean newbee = true;
 		if(cookies != null){
 			for(Cookie cookie : cookies){
-				String sId = cookie.getValue().split("__")[0];
-				if(cookie.getName().equals(cookieName) && sessionInfo.containsKey(sId)){
-					Date date = new Date();
-					Timestamp now = new Timestamp(date.getTime());	
-					
-					//double check the session is timeout
-					if(now.before(sessionInfo.get(sId).getTimeout())){
-						Long time = date.getTime();
-						sessionInfo.get(sId).setTimeout(new Timestamp(time + sessionAge));
-						sessionInfo.get(sId).setBegin(new Timestamp(time));
-						sessionInfo.get(sId).setVersion(sessionInfo.get(sId).getVersion()+1);
-						s = sessionInfo.get(sId);
-						
-						newbee = false;
-						break;
-					}else{
-						sessionInfo.remove(sId);
+				if(cookie.getName().equals(cookieName)){
+					String[] infos = cookie.getValue().split("__");
+					String sId = cookie.getValue().split("__")[0];
+					String sVersion = cookie.getValue().split("__")[1];
+					String id_ver = sId + "_" + sVersion;
+					/**
+					 * here we need to parse the cookie value and get the session info
+					 * ArrayList<String> serverList= new ArrayList<String>();
+					 * for(int i = 2; i < infos.length; i++){
+					 * 		serverList.add(infos[i]);
+					 * }
+					 * s = RPCRead(sId, sVersion, serverList);
+					 */
+					if(sessionInfo.containsKey(id_ver)){
+						Date date = new Date();
+						Timestamp now = new Timestamp(date.getTime());	
+						s = sessionInfo.get(id_ver);
+						//double check the session is timeout
+						if(now.before(s.getTimeout())){
+							Long time = date.getTime();
+							s.setTimeout(new Timestamp(time + sessionAge));
+							s.setBegin(new Timestamp(time));
+							s.setVersion(sessionInfo.get(id_ver).getVersion()+1);
+							
+							newbee = false;
+							break;
+						}else{
+							sessionInfo.remove(id_ver);
+						}
 					}
 				}
 			}
@@ -111,8 +123,14 @@ public class index extends HttpServlet {
 			int version = 1;
 			s = new Session(sessionID, version, "Hello world", sessionAge); 
 			// sessionInfo 
-			sessionInfo.put(sessionID, s);
+			String id_ver = s.getSessionId() + "_" + s.getVersion();
+			sessionInfo.put(id_ver, s);
 	    }
+		
+		// we can put the RPC write code here, 
+		// Set serverSet = RPCwrite(s);
+		// and then put the serverSet info in the cookie info
+		
 		
 		Map<String, String[]> map = request.getParameterMap();
 		
@@ -160,7 +178,10 @@ public class index extends HttpServlet {
 	
 	//if the user press the logout button
 	protected void logout(HttpServletRequest request, HttpServletResponse response, Session s) throws IOException{
-		sessionInfo.remove(s.getSessionId());
+		String id = s.getSessionId();
+		String ver = ""+s.getVersion();
+		String id_ver = id + "_" + ver;
+		sessionInfo.remove(id_ver);
 		
 		PrintWriter out = response.getWriter();
 		s = null;
@@ -181,7 +202,10 @@ public class index extends HttpServlet {
 	//if the user press the replace button
 	protected void replace(HttpServletRequest request, HttpServletResponse response, Session s) throws IOException{
 		s.setMessage(request.getParameter("Replace"));
-		sessionInfo.get(s.getSessionId()).setMessage(s.getMessage());
+		String id = s.getSessionId();
+		String ver = "" + s.getVersion();
+		String id_ver = id + "_" + ver;
+		sessionInfo.get(id_ver).setMessage(s.getMessage());
 		
 		String output = readFile(s); 
     	

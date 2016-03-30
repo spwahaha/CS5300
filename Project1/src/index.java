@@ -35,8 +35,9 @@ public class index extends HttpServlet {
 	private static final int sessionAge = 60 * 10 * 10;
 	private static final String cookieName = "CS5300PROJ1SESSION";
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	// sessionInfo  key: 
 	HashMap<String, Session> sessionInfo = new HashMap<>();
-       
+      
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -109,6 +110,7 @@ public class index extends HttpServlet {
 			String sessionID = UUID.randomUUID().toString();
 			int version = 1;
 			s = new Session(sessionID, version, "Hello world", sessionAge); 
+			// sessionInfo 
 			sessionInfo.put(sessionID, s);
 	    }
 		

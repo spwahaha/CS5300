@@ -21,6 +21,14 @@ public class Session {
 		timeout = new Timestamp(begin + time);
 	}
 	
+	public Session(Session session){
+		this.sessionId = session.sessionId;
+		this.version = session.version;
+		this.message = session.message;
+		this.begintime = new Timestamp(session.begintime.getTime());
+		this.timeout = new Timestamp(session.timeout.getTime());
+	}
+	
 	public void setSessionId(String s){
 		sessionId = s;
 	}

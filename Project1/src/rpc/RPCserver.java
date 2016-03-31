@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import session.Manager;
 import session.Session;
 
@@ -44,15 +43,16 @@ public class RPCserver {
 				if(output[0] == "true"){
 					outbuf = RPCclient.encode(output[1]);
 				}
-			}else if (operations == 0){
+			}else if (operations == 2){
 				output = sessionWrite(inputs);
 				if(output[0] == "true"){
 					outbuf = RPCclient.encode(output[1]);
 				}
 			}
+			
 			DatagramPacket sendPkt = new DatagramPacket(outbuf, outbuf.length, returnaddr, returnport);
 			rpcsocket.send(sendPkt);
-			
+			rpcsocket.close();
 		}
 		
 	}

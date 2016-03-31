@@ -29,7 +29,7 @@ function initSdb(){
 }
 
 function initInstance(){
-	echo $(aws ec2 run-instances --image-id $IMAGE_ID --count 3 --instance-type $INSTANCE_TYPE --key-name $KEY_NAME --security-groups $SECURITY_GROUP --user-data file://init.sh)
+	echo $(aws ec2 run-instances --image-id $IMAGE_ID --count 1 --instance-type $INSTANCE_TYPE --key-name $KEY_NAME --security-groups $SECURITY_GROUP --user-data file://init.sh)
 }
 
 

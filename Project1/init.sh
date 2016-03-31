@@ -7,7 +7,7 @@ SECRET_ACCESS_KEY="F15zlaagL0jmqac21kLq00vXdJNwVXZESI/kWTRB"
 IP=0
 AMI_LAUNCH_INDEX=0
 ItemNum=0
-ServerNum=3
+ServerNum=1
 function initTomcat() {
 	echo $(yum -y install tomcat8-webapps tomcat8-docs-webapp tomcat8-admin-webapps)
 }

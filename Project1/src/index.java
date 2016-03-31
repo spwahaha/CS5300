@@ -31,9 +31,13 @@ public class index extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Session s;
 	private String metadata = "1a";
+	private static final int cookieAge = 60 * 10;
+	private static final int sessionAge = 60 * 10 * 10;
+	private static final String cookieName = "CS5300PROJ1SESSION";
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	// sessionInfo  key: 
 	HashMap<String, Session> sessionInfo = new HashMap<>();
-       
+      
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -79,23 +83,35 @@ public class index extends HttpServlet {
 		boolean newbee = true;
 		if(cookies != null){
 			for(Cookie cookie : cookies){
-				String sId = cookie.getValue().split("__")[0];
-				if(cookie.getName().equals("CS5300") && sessionInfo.containsKey(sId)){
-					Date date = new Date();
-					Timestamp now = new Timestamp(date.getTime());	
-					
-					//double check the session is timeout
-					if(now.before(sessionInfo.get(sId).getTimeout())){
-						Long time = date.getTime();
-						sessionInfo.get(sId).setTimeout(new Timestamp(time + 60*60*10));
-						sessionInfo.get(sId).setBegin(new Timestamp(time));
-						sessionInfo.get(sId).setVersion(sessionInfo.get(sId).getVersion()+1);
-						s = sessionInfo.get(sId);
-						
-						newbee = false;
-						break;
-					}else{
-						sessionInfo.remove(sId);
+				if(cookie.getName().equals(cookieName)){
+					String[] infos = cookie.getValue().split("__");
+					String sId = cookie.getValue().split("__")[0];
+					String sVersion = cookie.getValue().split("__")[1];
+					String id_ver = sId + "_" + sVersion;
+					/**
+					 * here we need to parse the cookie value and get the session info
+					 * ArrayList<String> serverList= new ArrayList<String>();
+					 * for(int i = 2; i < infos.length; i++){
+					 * 		serverList.add(infos[i]);
+					 * }
+					 * s = RPCRead(sId, sVersion, serverList);
+					 */
+					if(sessionInfo.containsKey(id_ver)){
+						Date date = new Date();
+						Timestamp now = new Timestamp(date.getTime());	
+						s = sessionInfo.get(id_ver);
+						//double check the session is timeout
+						if(now.before(s.getTimeout())){
+							Long time = date.getTime();
+							s.setTimeout(new Timestamp(time + sessionAge));
+							s.setBegin(new Timestamp(time));
+							s.setVersion(sessionInfo.get(id_ver).getVersion()+1);
+							
+							newbee = false;
+							break;
+						}else{
+							sessionInfo.remove(id_ver);
+						}
 					}
 				}
 			}
@@ -105,9 +121,16 @@ public class index extends HttpServlet {
 		if(newbee != false){
 			String sessionID = UUID.randomUUID().toString();
 			int version = 1;
-			s = new Session(sessionID, version, "Hello world", 60*60*10); 
-			sessionInfo.put(sessionID, s);
+			s = new Session(sessionID, version, "Hello world", sessionAge); 
+			// sessionInfo 
+			String id_ver = s.getSessionId() + "_" + s.getVersion();
+			sessionInfo.put(id_ver, s);
 	    }
+		
+		// we can put the RPC write code here, 
+		// Set serverSet = RPCwrite(s);
+		// and then put the serverSet info in the cookie info
+		
 		
 		Map<String, String[]> map = request.getParameterMap();
 		
@@ -126,12 +149,12 @@ public class index extends HttpServlet {
 	    	PrintWriter out = response.getWriter();
 	    	String output = readFile(s); 
 	    
-	    	Cookie sessionCookie = new Cookie("CS5300", s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
+	    	Cookie sessionCookie = new Cookie(cookieName, s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
 	    	
 	    	output = output.replace("#cookieId#", sessionCookie.getValue());
 	    	out.println(output);
 			
-	    	sessionCookie.setMaxAge(60*10);
+	    	sessionCookie.setMaxAge(cookieAge);
 			response.setContentType("text/html"); 
 			response.addCookie(sessionCookie);
 	    }
@@ -143,19 +166,22 @@ public class index extends HttpServlet {
     	String output = readFile(s); 
     	
     	
-    	Cookie sessionCookie = new Cookie("CS5300", s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
+    	Cookie sessionCookie = new Cookie(cookieName, s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
     	
     	output = output.replace("#cookieId#", sessionCookie.getValue());
     	out.println(output);
     	
-		sessionCookie.setMaxAge(60*10);
+		sessionCookie.setMaxAge(cookieAge);
 		response.setContentType("text/html"); 
 		response.addCookie(sessionCookie);		 	 
 	}
 	
 	//if the user press the logout button
 	protected void logout(HttpServletRequest request, HttpServletResponse response, Session s) throws IOException{
-		sessionInfo.remove(s.getSessionId());
+		String id = s.getSessionId();
+		String ver = ""+s.getVersion();
+		String id_ver = id + "_" + ver;
+		sessionInfo.remove(id_ver);
 		
 		PrintWriter out = response.getWriter();
 		s = null;
@@ -163,7 +189,7 @@ public class index extends HttpServlet {
     	String output = readFile(s); 
     	
     	
-    	Cookie sessionCookie = new Cookie("CS5300", "");
+    	Cookie sessionCookie = new Cookie(cookieName, "");
     	output = output.replace("#cookieId#", sessionCookie.getValue());
     	
     	out.println(output);
@@ -176,18 +202,21 @@ public class index extends HttpServlet {
 	//if the user press the replace button
 	protected void replace(HttpServletRequest request, HttpServletResponse response, Session s) throws IOException{
 		s.setMessage(request.getParameter("Replace"));
-		sessionInfo.get(s.getSessionId()).setMessage(s.getMessage());
+		String id = s.getSessionId();
+		String ver = "" + s.getVersion();
+		String id_ver = id + "_" + ver;
+		sessionInfo.get(id_ver).setMessage(s.getMessage());
 		
 		String output = readFile(s); 
     	
-		Cookie sessionCookie = new Cookie("CS5300", s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
+		Cookie sessionCookie = new Cookie(cookieName, s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
     	
 		output = output.replace("#cookieId#", sessionCookie.getValue());
     	
     	PrintWriter out = response.getWriter();
     	out.println(output);
     	
-    	sessionCookie.setMaxAge(60*10);
+    	sessionCookie.setMaxAge(sessionAge);
 		response.setContentType("text/html"); 
 		response.addCookie(sessionCookie);
 		

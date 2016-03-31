@@ -11,10 +11,10 @@ import session.Session;
 
 
 public class RPCclient {
-	public final static int maxPacket = 4096;
+	public final static int maxPacket = 512;
 
 	public static byte[] encode(String s){
-		byte[] result = new byte[512];
+		byte[] result = new byte[maxPacket];
 		
 		if( s == null || s.length() == 0){
 			return result;
@@ -72,9 +72,9 @@ public class RPCclient {
 		DatagramSocket rpcsocket = new DatagramSocket();
 		String result = ""; 
 		
-		byte[] outbuf = new byte[512];
+		byte[] outbuf = new byte[maxPacket];
 		
-		String out = callID + "#1#" + s.getSessionId();
+		String out = callID + "#2#" + s.getSessionId();
 		outbuf = encode(out);
 		
 		for(Server server : dest){

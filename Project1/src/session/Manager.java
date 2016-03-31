@@ -1,4 +1,5 @@
- 
+package session;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -27,7 +28,7 @@ import session.Session;
  * Servlet implementation class Session
  */
 @WebServlet("/Session")
-public class index extends HttpServlet {
+public class Manager extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Session s;
 	private String metadata = "1a";
@@ -36,13 +37,13 @@ public class index extends HttpServlet {
 	private static final String cookieName = "CS5300PROJ1SESSION";
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	// sessionInfo  key: 
-	HashMap<String, Session> sessionInfo = new HashMap<>();
+	public static HashMap<String, Session> sessionInfo = new HashMap<>();
       
     /**
      * @see HttpServlet#HttpServlet()
      */
 
-    public index() {
+    public Manager() {
         super();
         
         updateForFiveMinutes();

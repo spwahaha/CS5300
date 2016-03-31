@@ -12,6 +12,7 @@ import session.Session;
 
 public class RPCclient {
 	public final static int maxPacket = 512;
+	public final static int timeout = 2000;
 
 	public static byte[] encode(String s){
 		byte[] result = new byte[maxPacket];
@@ -36,11 +37,12 @@ public class RPCclient {
 	public static String read(Session s, List<Server> dest) throws IOException{
 		String callID =  UUID.randomUUID().toString();
 		DatagramSocket rpcsocket = new DatagramSocket();
+		rpcsocket.setSoTimeout(timeout);
 		String result = ""; 
 		
 		byte[] outbuf = new byte[512];
 		
-		String out = callID + "#1#" + s.getSessionId();
+		String out = callID + "#1#" + s.getSessionId()+ "#" + s.getVersion();
 		outbuf = encode(out);
 		
 		for(Server server : dest){
@@ -70,11 +72,12 @@ public class RPCclient {
 	public String write(Session s, List<Server> dest) throws IOException{
 		String callID =  UUID.randomUUID().toString();
 		DatagramSocket rpcsocket = new DatagramSocket();
+		rpcsocket.setSoTimeout(timeout);
 		String result = ""; 
 		
 		byte[] outbuf = new byte[maxPacket];
 		
-		String out = callID + "#2#" + s.getSessionId();
+		String out = callID + "#2#" + s.getSessionId()+ "#" + s.getVersion() + "#" + s.getMessage();
 		outbuf = encode(out);
 		
 		for(Server server : dest){

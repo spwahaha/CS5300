@@ -96,6 +96,10 @@ public class Manager extends HttpServlet {
 					 * 		serverList.add(infos[i]);
 					 * }
 					 * s = RPCRead(sId, sVersion, serverList);
+					 * 
+					 * update
+					 * 
+					 * s = PRCWrite(.....s, timeout);
 					 */
 					if(sessionInfo.containsKey(id_ver)){
 						Date date = new Date();

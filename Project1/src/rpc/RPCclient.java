@@ -13,6 +13,7 @@ import session.Session;
 public class RPCclient {
 	public final static int maxPacket = 512;
 	public final static int timeout = 2000;
+	public final static int wq = 2;
 
 	public static byte[] encode(String s){
 		byte[] result = new byte[maxPacket];
@@ -70,6 +71,7 @@ public class RPCclient {
 	}
 	
 	public String write(Session s, List<Server> dest) throws IOException{
+		int count = 0;
 		String callID =  UUID.randomUUID().toString();
 		DatagramSocket rpcsocket = new DatagramSocket();
 		rpcsocket.setSoTimeout(timeout);
@@ -77,29 +79,36 @@ public class RPCclient {
 		
 		byte[] outbuf = new byte[maxPacket];
 		
-		String out = callID + "#2#" + s.getSessionId()+ "#" + s.getVersion() + "#" + s.getMessage();
+		int version = s.getVersion() + 1; 
+		String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout() + "#" + s.getMessage();
+		
 		outbuf = encode(out);
+		boolean done = false;
 		
-		for(Server server : dest){
-			DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.ip, server.port);
-			rpcsocket.send(sendpkt);
-		}
-		
-		byte[] inbuf = new byte[maxPacket];
-		DatagramPacket recvpkt = new DatagramPacket(inbuf, inbuf.length);
-		
-		try{
-			while(true){
-				recvpkt.setLength(inbuf.length);
-				rpcsocket.receive(recvpkt);
-				if(decode(inbuf).split("#")[0].equals(callID)){
-					break;
-				}
+		while(!done){
+			for(Server server : dest){
+				DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.ip, server.port);
+				rpcsocket.send(sendpkt);
 			}
-		}catch(SocketTimeoutException stoe){
-			recvpkt = null;
+			
+			byte[] inbuf = new byte[maxPacket];
+			DatagramPacket recvpkt = new DatagramPacket(inbuf, inbuf.length);
+			
+			try{
+			
+				while(count < wq){
+					recvpkt.setLength(inbuf.length);
+					rpcsocket.receive(recvpkt);
+					if(decode(inbuf).split("#")[0].equals(callID)){
+						count++;
+					}
+				}
+				done = true;
+			}catch(SocketTimeoutException stoe){
+				recvpkt = null;
+			}
+			result = decode(inbuf);
 		}
-		result = decode(inbuf);
 		rpcsocket.close();
 		return result;
 	}

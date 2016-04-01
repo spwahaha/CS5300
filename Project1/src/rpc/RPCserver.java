@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.sql.Timestamp;
+
 import session.Manager;
 import session.Session;
 
@@ -16,8 +18,6 @@ public class RPCserver {
 	public RPCserver() throws IOException{
 		init();
 	}
-	
-	
 	
 	public void init() throws IOException{
 		DatagramSocket rpcsocket = new DatagramSocket(portPROJ1BRPC);
@@ -77,26 +77,22 @@ public class RPCserver {
 	
 	public String[] sessionWrite(String[] in){
 		String[] result = new String[2];
-		String callID = in[0];
-		String sessionID = in[2];
 		
+		if(in.length < 5){
+			return result;
+		}
+		String sessionID = in[2];
 		//different with read
 		int version = Integer.parseInt(in[3]);
-		String message = in[4];
-		String key = sessionID+"_"+version;
+		Timestamp timout = new Timestamp(Long.parseLong(in[4]));
+		String message = in[5];
 		
-		result[1] = callID;
-		if(Manager.sessionInfo.containsKey(key)){
-			version++;
-			key = sessionID + "_" + version;
-			Manager.sessionInfo.put(key, new Session(sessionID, version, message,sessionAge));
-			result[0] = "true";
-		}else{
-			result[0] = "false";
-		}
+		String key = sessionID+"_"+version;
+		Session newSession = new Session(sessionID, version, message, sessionAge);
+		newSession.setTimeout(timout);
+		Manager.sessionInfo.put(key, newSession);
+		result[0] = "true";
 		return result;
 	}
-	
-	
 	
 }

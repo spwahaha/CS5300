@@ -60,6 +60,10 @@ public class RPCserver {
 	//result include two string, String[0] -> flag, String[1] -> data
 	public String[] sessionRead(String[] in){
 		String[] result = new String[2];
+		
+		if(in.length < 4){
+			return result;
+		}
 		String callID = in[0];
 		String sessionID = in[2];
 		String version = in[3];
@@ -94,5 +98,4 @@ public class RPCserver {
 		result[0] = "true";
 		return result;
 	}
-	
 }

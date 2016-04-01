@@ -65,7 +65,7 @@ public class RPCclient {
 			}
 		}catch(SocketTimeoutException stoe){
 			recvpkt = null;
-		}
+		}// here, if its IOException, my retry receive 
 		result = decode(inbuf);
 		rpcsocket.close();
 		return result;
@@ -100,7 +100,6 @@ public class RPCclient {
 			DatagramPacket recvpkt = new DatagramPacket(inbuf, inbuf.length);
 			
 			try{
-			
 				while(count < wq){
 					recvpkt.setLength(inbuf.length);
 					rpcsocket.receive(recvpkt);

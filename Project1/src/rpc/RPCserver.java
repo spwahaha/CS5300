@@ -29,13 +29,14 @@ public class RPCserver {
 			int returnport = recvpkt.getPort();
 			
 			//input[0] -> callID, input[1] -> operationcode input[2] -> sessionID input[3] -> version
-			//input[4] -> write data
+			//input[4] -> expire_data input[5] -> message
 			String[] inputs = RPCclient.decode(inbuf).split("#");
 			
+			// callID length might be greater than 1
 			if(inputs[1].length() != 1) continue;
 			
 			String[] output = null;
-			byte[] outbuf = null;
+			byte[] outbuf = new byte[maxPacket];
 			
 			int operations =  Integer.parseInt(inputs[1]);
 			if( operations == 1){
@@ -46,6 +47,7 @@ public class RPCserver {
 			}else if (operations == 2){
 				output = sessionWrite(inputs);
 				if(output[0] == "true"){
+					output[1] = inputs[0];
 					outbuf = RPCclient.encode(output[1]);
 				}
 			}
@@ -76,6 +78,7 @@ public class RPCserver {
 	}
 	
 	public String[] sessionWrite(String[] in){
+		// the result should include callID
 		String[] result = new String[2];
 		
 		if(in.length < 5){

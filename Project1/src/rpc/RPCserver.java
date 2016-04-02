@@ -10,13 +10,23 @@ import java.sql.Timestamp;
 import session.Manager;
 import session.Session;
 
-public class RPCserver {
+public class RPCserver extends Thread{
 	public final static int portPROJ1BRPC = 5300;
 	public final static int maxPacket = 512;
 	private static final int sessionAge = 60 * 10 * 10;
 	
 	public RPCserver() throws IOException{
-		init();
+//		init();
+		super("RPCserver Thread");
+	}
+	
+	public void run(){
+		try {
+			init();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void init() throws IOException{
@@ -30,8 +40,8 @@ public class RPCserver {
 			
 			//input[0] -> callID, input[1] -> operationcode input[2] -> sessionID input[3] -> version
 			//input[4] -> expire_data input[5] -> message
+			System.out.println("server received data: " + RPCclient.decode(inbuf));
 			String[] inputs = RPCclient.decode(inbuf).split("#");
-			
 			// callID length might be greater than 1
 			if(inputs[1].length() != 1) continue;
 			
@@ -40,23 +50,29 @@ public class RPCserver {
 			
 			int operations =  Integer.parseInt(inputs[1]);
 			if( operations == 1){
+				System.out.println("read session");
 				output = sessionRead(inputs);
-				if(output[1].equals("true")){
+				for(String str : output){
+					System.out.println("output info:  " + str);
+				}
+//				if(output[1].equals("true")){	
 					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#" + output[2]);
-				}
+//				}
 			}else if (operations == 2){
+				System.out.println("write session");
 				output = sessionWrite(inputs);
-				if(output[1].equals("true")){
-//					output[1] = inputs[0];
-					outbuf = RPCclient.encode(output[0] + "#" + output[1]);
+				for(String str : output){
+					System.out.println("output info:  " + str);
 				}
+//				if(output[1].equals("true")){
+					outbuf = RPCclient.encode(output[0] + "#" + output[1]);
+//				}
 			}
 			
 			DatagramPacket sendPkt = new DatagramPacket(outbuf, outbuf.length, returnaddr, returnport);
 			rpcsocket.send(sendPkt);
-			rpcsocket.close();
 		}
-		
+//		rpcsocket.close();		
 	}
 	
 	//result include two string, String[0] -> flag, String[1] -> data
@@ -87,7 +103,9 @@ public class RPCserver {
 	public String[] sessionWrite(String[] in){
 		//in[0]: callID, [1]: operationFlag [2]: sessionID, [3]:versionNum [4]:timeOut [5]: message
 		//String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout() + "#" + s.getMessage();
-
+		for(String str : in){
+			System.out.println("in info:  " + str);
+		}
 		// the result should include callID
 		String[] result = new String[2];
 		result[0] = in[0]; // callID

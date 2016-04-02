@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import session.Session;
 
@@ -12,7 +13,7 @@ import session.Session;
 public class RPCclient {
 	public final static int maxPacket = 512;
 	public final static int timeout = 2000;
-	public final static int wq = 2;
+	public final static int wq = 1;
 
 	public static byte[] encode(String s){
 		byte[] result = new byte[maxPacket];
@@ -37,6 +38,7 @@ public class RPCclient {
 	
 	public static String read(Session s, List<Server> dest) throws IOException{
 		// no necessary to use uuid, a counter is just fine
+		System.out.println("rpc read start with server info" + dest);
 		String callID =  UUID.randomUUID().toString();
 		DatagramSocket rpcsocket = new DatagramSocket();
 		rpcsocket.setSoTimeout(timeout);
@@ -45,10 +47,12 @@ public class RPCclient {
 		byte[] outbuf = new byte[512];
 		// 1 means read operation 
 		String out = callID + "#1#" + s.getSessionId()+ "#" + s.getVersion();
+		System.out.println("out info:  " + out);
 		outbuf = encode(out);
 		
 		for(Server server : dest){
-			DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.ip, server.port);
+			System.out.println("send request to: " + dest);
+			DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.private_ip, server.port);
 			rpcsocket.send(sendpkt);
 		}
 		
@@ -59,7 +63,9 @@ public class RPCclient {
 			while(true){
 				recvpkt.setLength(inbuf.length);
 				rpcsocket.receive(recvpkt);
+				System.out.println("received one packet from server: " + decode(inbuf));
 				if(decode(inbuf).split("#")[0].equals(callID)){
+					System.out.println("success read from other server");
 					break;
 				}
 			}
@@ -68,10 +74,18 @@ public class RPCclient {
 		}// here, if its IOException, my retry receive 
 		result = decode(inbuf);
 		rpcsocket.close();
+		System.out.println("read end with result:  " + result);
 		return result;
 	}
 	
-	public String write(Session s, List<Server> dest) throws IOException{
+	/**
+	 * This method should return a list of index of the server that save the session info
+	 * @param s
+	 * @param dest
+	 * @return
+	 * @throws IOException
+	 */
+	public static String write(Session s, Set<Server> dest) throws IOException{
 		int count = 0;
 		String callID =  UUID.randomUUID().toString();
 		DatagramSocket rpcsocket = new DatagramSocket();
@@ -85,14 +99,14 @@ public class RPCclient {
 //		int version = s.getVersion() + 1; 
 		
 		int version = s.getVersion();
-		String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout() + "#" + s.getMessage();
+		String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout().getTime() + "#" + s.getMessage();
 		
 		outbuf = encode(out);
 		boolean done = false;
 		
 		while(!done){
 			for(Server server : dest){
-				DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.ip, server.port);
+				DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.private_ip, server.port);
 				rpcsocket.send(sendpkt);
 			}
 			

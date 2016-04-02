@@ -21,6 +21,11 @@ public class Session {
 		timeout = new Timestamp(begin + time);
 	}
 	
+	public Session(String sessionId, int version){
+		this.sessionId = sessionId;
+		this.version = version;
+	}
+	
 	public Session(Session session){
 		this.sessionId = session.sessionId;
 		this.version = session.version;

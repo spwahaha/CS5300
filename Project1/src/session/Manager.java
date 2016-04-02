@@ -186,8 +186,12 @@ public class Manager extends HttpServlet {
 //					 		serverList.add(infos[i]);
 					 }
 					 System.out.println("RPC read start");
-					 String fdbk = RPCclient.read(new Session(sId, sVersion), serverList);
+					 String fdbk = "";
+					 do{
+					 fdbk = RPCclient.read(new Session(sId, sVersion), serverList);
 					 System.out.print("RPC read end with info: " + fdbk);
+					 }while(fdbk.split("#").length < 1);
+					 
 					 String success = fdbk.split("#")[1];
 					 if(success.equals("false")){
 						 break;

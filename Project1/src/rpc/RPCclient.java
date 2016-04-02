@@ -99,7 +99,7 @@ public class RPCclient {
 //		int version = s.getVersion() + 1; 
 		
 		int version = s.getVersion();
-		String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout() + "#" + s.getMessage();
+		String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout().getTime() + "#" + s.getMessage();
 		
 		outbuf = encode(out);
 		boolean done = false;

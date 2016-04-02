@@ -64,9 +64,8 @@ public class RPCserver extends Thread{
 			
 			DatagramPacket sendPkt = new DatagramPacket(outbuf, outbuf.length, returnaddr, returnport);
 			rpcsocket.send(sendPkt);
-			rpcsocket.close();
 		}
-		
+//		rpcsocket.close();		
 	}
 	
 	//result include two string, String[0] -> flag, String[1] -> data

@@ -53,10 +53,10 @@ public class RPCserver extends Thread{
 				System.out.println("read session");
 				output = sessionRead(inputs);
 				for(String str : output){
-					System.out.println("output info:  " + str);
+					System.out.println("read session info:  " + str);
 				}
 //				if(output[1].equals("true")){	
-					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#" + output[2]);
+					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#" + output[2] + "#");
 //				}
 			}else if (operations == 2){
 				System.out.println("write session");
@@ -65,7 +65,7 @@ public class RPCserver extends Thread{
 					System.out.println("output info:  " + str);
 				}
 //				if(output[1].equals("true")){
-					outbuf = RPCclient.encode(output[0] + "#" + output[1]);
+					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#");
 //				}
 			}
 			
@@ -75,6 +75,8 @@ public class RPCserver extends Thread{
 //		rpcsocket.close();		
 	}
 	
+	//input[0] -> callID, input[1] -> operationcode input[2] -> sessionID input[3] -> version
+	//input[4] -> expire_data input[5] -> message
 	//result include two string, String[0] -> flag, String[1] -> data
 	public String[] sessionRead(String[] in){
 		String[] result = new String[3];
@@ -88,9 +90,11 @@ public class RPCserver extends Thread{
 		String sessionID = in[2];
 		String version = in[3];
 		String key = sessionID+"_"+version;
-		
+		System.out.println("key :  " + key);
+		System.out.println(Manager.sessionInfo);
 		result[0] = callID;
 		if(Manager.sessionInfo.containsKey(key)){
+			System.out.println("contains session info");
 			result[1] = "true";
 			result[2] = Manager.sessionInfo.get(key).getMessage();
 		}else{
@@ -121,6 +125,7 @@ public class RPCserver extends Thread{
 		String key = sessionID+"_"+version;
 		Session newSession = new Session(sessionID, version, message, sessionAge);
 		newSession.setTimeout(timout);
+		System.out.println("put session in server");
 		Manager.sessionInfo.put(key, newSession);
 		result[1] = "true";
 		return result;

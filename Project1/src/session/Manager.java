@@ -55,8 +55,8 @@ public class Manager extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Session s;
 	private String metadata = "0";
-	private static final int cookieAge = 60 * 10;
-	private static final int sessionAge = 60 * 10 * 10;
+	private static final int cookieAge = 60 * 10 * 10;
+	private static final int sessionAge = 60 * 10 * 10 * 1000;
 	private static final String cookieName = "CS5300PROJ1SESSION";
 	private static final String accessKey = "AKIAIOO6HTOHZF5LG65Q";
 	private static final String secretKey = "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";
@@ -192,6 +192,7 @@ public class Manager extends HttpServlet {
 					 if(success.equals("false")){
 						 break;
 					 }
+					 
 					 String msg = fdbk.split("#")[2];
 					 s = new Session(sId, sVersion + 1, msg, this.sessionAge);
 					 newbee = false;
@@ -232,7 +233,7 @@ public class Manager extends HttpServlet {
 	    }
 		
 
-		
+
 		
 		Map<String, String[]> map = request.getParameterMap();
 		

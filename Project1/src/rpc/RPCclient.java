@@ -46,7 +46,7 @@ public class RPCclient {
 		
 		byte[] outbuf = new byte[512];
 		// 1 means read operation 
-		String out = callID + "#1#" + s.getSessionId()+ "#" + s.getVersion();
+		String out = callID + "#1#" + s.getSessionId()+ "#" + s.getVersion() + "#";
 		System.out.println("out info:  " + out);
 		outbuf = encode(out);
 		
@@ -99,7 +99,7 @@ public class RPCclient {
 //		int version = s.getVersion() + 1; 
 		
 		int version = s.getVersion();
-		String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout().getTime() + "#" + s.getMessage();
+		String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout().getTime() + "#" + s.getMessage() + "#";
 		
 		outbuf = encode(out);
 		boolean done = false;

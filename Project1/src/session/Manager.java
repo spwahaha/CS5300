@@ -55,8 +55,8 @@ public class Manager extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Session s;
 	private String metadata = "0";
-	private static final int cookieAge = 60 * 10;
-	private static final int sessionAge = 60 * 10 * 10;
+	private static final int cookieAge = 60 * 10 * 10;
+	private static final int sessionAge = 60 * 10 * 10 * 1000;
 	private static final String cookieName = "CS5300PROJ1SESSION";
 	private static final String accessKey = "AKIAIOO6HTOHZF5LG65Q";
 	private static final String secretKey = "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";
@@ -101,8 +101,8 @@ public class Manager extends HttpServlet {
 	        sdb.createDomain(new CreateDomainRequest(myDomain));
 	        List<ReplaceableAttribute> sampleData = new ArrayList<ReplaceableAttribute>();
 	        sampleData.add(new ReplaceableAttribute("Index", "0", true));
-	        sampleData.add(new ReplaceableAttribute("Private_ip", "127.0.0.1", true));
-	        sampleData.add(new ReplaceableAttribute("Public_ip", "127.0.0.1", true));
+	        sampleData.add(new ReplaceableAttribute("Private_ip", "192.168.23.2", true));
+	        sampleData.add(new ReplaceableAttribute("Public_ip", "192.168.23.2", true));
 
 	        PutAttributesRequest pr = new PutAttributesRequest(myDomain, "Item_01", sampleData);
 	    	sdb.putAttributes(pr);
@@ -192,6 +192,7 @@ public class Manager extends HttpServlet {
 					 if(success.equals("false")){
 						 break;
 					 }
+					 
 					 String msg = fdbk.split("#")[2];
 					 s = new Session(sId, sVersion + 1, msg, this.sessionAge);
 					 newbee = false;
@@ -232,7 +233,7 @@ public class Manager extends HttpServlet {
 	    }
 		
 
-		
+
 		
 		Map<String, String[]> map = request.getParameterMap();
 		
@@ -262,7 +263,8 @@ public class Manager extends HttpServlet {
 		// we can put the RPC write code here, 
 //		 Set serverSet = RPCwrite(s);
 		Set<Server> serverSet = getWriteServer(W);
-		RPCclient.write(s, serverSet);
+		String writeResult = RPCclient.write(s, serverSet);
+		System.out.println("write Result:  " + writeResult);
 		// and then put the serverSet info in the cookie info
 		
 	}

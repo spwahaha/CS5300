@@ -8,7 +8,8 @@ ItemNum=0
 IMAGE_ID="ami-c229c0a2"
 INSTANCE_TYPE="t2.micro"
 KEY_NAME="zp01-key-pair-uswest2"
-SECURITY_GROUP="launch-wizard-1"
+SECURITY_GROUP="sg-e3ce7584"
+INSTANCE_INFO=""
 
 function initSdb(){
 	echo $(aws configure set aws_access_key_id $ACCESS_KEY_ID)
@@ -29,9 +30,33 @@ function initSdb(){
 }
 
 function initInstance(){
-	echo $(aws ec2 run-instances --image-id $IMAGE_ID --count 1 --instance-type $INSTANCE_TYPE --key-name $KEY_NAME --security-groups $SECURITY_GROUP --user-data file://init.sh)
+	INSTANCE_INFO=$(aws ec2 run-instances --image-id $IMAGE_ID --count 1 --instance-type $INSTANCE_TYPE --key-name $KEY_NAME --security-group-ids $SECURITY_GROUP  --user-data file://init.sh --associate-public-ip-address > "instanceInfo.txt")
+	echo $INSTANCE_INFO
 }
 
+function transferFile(){
+	INFO=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" | grep "PublicIpAddress" | sed -E 's/.*["]([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/ec2-user@\1:P1.war/')
+	# INFO=$(cat running.txt | grep "PublicIpAddress")
+	# INFO=$(cat running.txt | grep "PublicIpAddress" | sed -E 's/.*["]([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
 
+	echo $INFO  
+	echo ${#INFO}
+	while [[ ${#INFO} -eq 0 ]]; do
+	 	sleep 2
+	 	INFO=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" | grep "PublicIpAddress" | sed -E 's/.*["]([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/ec2-user@\1:P1.war/')
+		echo $INFO  
+	done 
+
+	arr=$(echo $INFO | tr " " "\n")
+	sleep 10
+	for x in $arr
+	do
+		TRANS=$(scp -i -o StrictHostKeyChecking=no "zp01-key-pair-uswest2.pem" P1.war "$x" )
+	    echo "$x"
+	done
+}
+
+# scp -i "zp01-key-pair-uswest2.pem" -o StrictHostKeyChecking=no P1.war ec2-user@52.34.245.226:P1.war
 initSdb
 initInstance
+# transferFile

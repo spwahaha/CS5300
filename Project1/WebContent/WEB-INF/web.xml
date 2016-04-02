@@ -11,12 +11,12 @@
   </welcome-file-list>
     
 <servlet>
-    <servlet-name>index</servlet-name>
-    <servlet-class>index</servlet-class>
+    <servlet-name>session.Manager</servlet-name>
+    <servlet-class>session.Manager</servlet-class>
 </servlet>
 
 <servlet-mapping>
-    <servlet-name>index</servlet-name>
+    <servlet-name>session.Manager</servlet-name>
     <url-pattern>/index</url-pattern>
 </servlet-mapping>
 

@@ -4,16 +4,17 @@
 
 ACCESS_KEY_ID="AKIAIOO6HTOHZF5LG65Q"
 SECRET_ACCESS_KEY="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"
-IP=0
+LOCAL_IP=0
+PUBLIC_IP=0
 AMI_LAUNCH_INDEX=0
 ItemNum=0
 ServerNum=1
 function initTomcat() {
-	echo $(yum -y install tomcat8-webapps tomcat8-docs-webapp tomcat8-admin-webapps)
+	echo $(yum -y install tomcat7-webapps tomcat7-docs-webapp tomcat7-admin-webapps)
 }
 
 function startTomcat(){
-	echo $(service tomcat8 start)
+	echo $(service tomcat7 start)
 	# echo $(sudo service tomcat8 stop)
 }
 
@@ -28,12 +29,13 @@ function initSdb(){
 
 function insertData(){
 	# echo $(rm *)
-	IP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
+	LOCAL_IP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
+	PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
 	AMI_LAUNCH_INDEX=$(curl http://169.254.169.254/latest/meta-data/ami-launch-index)
 	echo "ami-launch-index:  $AMI_LAUNCH_INDEX"
 	echo "ip: $IP"
-	ATTRIBUTE='[{"Name": "Index","Value": ''"'"$AMI_LAUNCH_INDEX"'"''},{"Name":"Ip","Value":''"'"$IP"'"''}]'
-	# echo $ATTRIBUTE
+	ATTRIBUTE='[{"Name": "Index","Value": ''"'"$AMI_LAUNCH_INDEX"'"''},{"Name":"Private_ip","Value":''"'"$LOCAL_IP"'"''},{"Name":"Public_ip","Value":''"'"$PUBLIC_IP"'"''}]'
+	echo $ATTRIBUTE
 	echo $(aws sdb put-attributes --domain-name test1 --item-name "item$AMI_LAUNCH_INDEX" --attributes "$ATTRIBUTE")
 	echo $(aws sdb select --select-expression "select * from test1")
 }
@@ -46,9 +48,27 @@ function saveData(){
 	done
 	echo $(aws sdb select --select-expression "select * from test1" > "NodesDB.txt")
 }
+
+function deployJava(){
+	echo $(yum -y remove java-1.7.0-openjdk)
+	echo $(yum -y install java-1.8.0)
+}
+
+function deployWar(){
+	while ! [[ -f ~/P1.war ]];
+	do
+		sleep 2
+		echo "no file found"
+	done
+	echo "file found"
+	echo $(mv ~/P1.war /usr/share/tomcat7/webapps)
+	echo "move successfully"
+}
 # echo $(cd ~)
+deployJava
 initTomcat
 initSdb
 insertData
 saveData
 startTomcat
+# deployWar

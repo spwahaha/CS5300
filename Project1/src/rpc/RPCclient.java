@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import session.Session;
 
@@ -48,7 +49,7 @@ public class RPCclient {
 		outbuf = encode(out);
 		
 		for(Server server : dest){
-			DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.ip, server.port);
+			DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.private_ip, server.port);
 			rpcsocket.send(sendpkt);
 		}
 		
@@ -71,7 +72,7 @@ public class RPCclient {
 		return result;
 	}
 	
-	public String write(Session s, List<Server> dest) throws IOException{
+	public static String write(Session s, Set<Server> dest) throws IOException{
 		int count = 0;
 		String callID =  UUID.randomUUID().toString();
 		DatagramSocket rpcsocket = new DatagramSocket();
@@ -92,7 +93,7 @@ public class RPCclient {
 		
 		while(!done){
 			for(Server server : dest){
-				DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.ip, server.port);
+				DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.private_ip, server.port);
 				rpcsocket.send(sendpkt);
 			}
 			

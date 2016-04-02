@@ -51,13 +51,17 @@ public class RPCserver extends Thread{
 			int operations =  Integer.parseInt(inputs[1]);
 			if( operations == 1){
 				System.out.println("read session");
+				
 				output = sessionRead(inputs);
+				
 				for(String str : output){
 					System.out.println("read session info:  " + str);
 				}
-//				if(output[1].equals("true")){	
+				if(output[1].equals("true")){	
 					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#" + output[2] + "#");
-//				}
+				}else{
+					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#");
+				}
 			}else if (operations == 2){
 				System.out.println("write session");
 				output = sessionWrite(inputs);
@@ -80,7 +84,7 @@ public class RPCserver extends Thread{
 	//result include two string, String[0] -> flag, String[1] -> data
 	public String[] sessionRead(String[] in){
 
-		String[] result = new String[2];
+		String[] result = new String[3];
 		// result[0] callID, result[1] true or false, result[2] data
 		result[0] = in[0];
 		result[1] = "false";

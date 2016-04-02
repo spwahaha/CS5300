@@ -101,8 +101,8 @@ public class Manager extends HttpServlet {
 	        sdb.createDomain(new CreateDomainRequest(myDomain));
 	        List<ReplaceableAttribute> sampleData = new ArrayList<ReplaceableAttribute>();
 	        sampleData.add(new ReplaceableAttribute("Index", "0", true));
-	        sampleData.add(new ReplaceableAttribute("Private_ip", "127.0.0.1", true));
-	        sampleData.add(new ReplaceableAttribute("Public_ip", "127.0.0.1", true));
+	        sampleData.add(new ReplaceableAttribute("Private_ip", "192.168.23.2", true));
+	        sampleData.add(new ReplaceableAttribute("Public_ip", "192.168.23.2", true));
 
 	        PutAttributesRequest pr = new PutAttributesRequest(myDomain, "Item_01", sampleData);
 	    	sdb.putAttributes(pr);
@@ -263,7 +263,8 @@ public class Manager extends HttpServlet {
 		// we can put the RPC write code here, 
 //		 Set serverSet = RPCwrite(s);
 		Set<Server> serverSet = getWriteServer(W);
-		RPCclient.write(s, serverSet);
+		String writeResult = RPCclient.write(s, serverSet);
+		System.out.println("write Result:  " + writeResult);
 		// and then put the serverSet info in the cookie info
 		
 	}

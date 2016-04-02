@@ -40,8 +40,8 @@ public class RPCserver extends Thread{
 			
 			//input[0] -> callID, input[1] -> operationcode input[2] -> sessionID input[3] -> version
 			//input[4] -> expire_data input[5] -> message
+			System.out.println("server received data: " + RPCclient.decode(inbuf));
 			String[] inputs = RPCclient.decode(inbuf).split("#");
-			
 			// callID length might be greater than 1
 			if(inputs[1].length() != 1) continue;
 			
@@ -50,16 +50,23 @@ public class RPCserver extends Thread{
 			
 			int operations =  Integer.parseInt(inputs[1]);
 			if( operations == 1){
+				System.out.println("read session");
 				output = sessionRead(inputs);
-				if(output[1].equals("true")){
+				for(String str : output){
+					System.out.println("output info:  " + str);
+				}
+//				if(output[1].equals("true")){	
 					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#" + output[2]);
-				}
+//				}
 			}else if (operations == 2){
+				System.out.println("write session");
 				output = sessionWrite(inputs);
-				if(output[1].equals("true")){
-//					output[1] = inputs[0];
-					outbuf = RPCclient.encode(output[0] + "#" + output[1]);
+				for(String str : output){
+					System.out.println("output info:  " + str);
 				}
+//				if(output[1].equals("true")){
+					outbuf = RPCclient.encode(output[0] + "#" + output[1]);
+//				}
 			}
 			
 			DatagramPacket sendPkt = new DatagramPacket(outbuf, outbuf.length, returnaddr, returnport);

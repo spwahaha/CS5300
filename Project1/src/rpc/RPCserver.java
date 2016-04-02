@@ -10,13 +10,23 @@ import java.sql.Timestamp;
 import session.Manager;
 import session.Session;
 
-public class RPCserver {
+public class RPCserver extends Thread{
 	public final static int portPROJ1BRPC = 5300;
 	public final static int maxPacket = 512;
 	private static final int sessionAge = 60 * 10 * 10;
 	
 	public RPCserver() throws IOException{
-		init();
+//		init();
+		super("RPCserver Thread");
+	}
+	
+	public void run(){
+		try {
+			init();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void init() throws IOException{
@@ -86,7 +96,9 @@ public class RPCserver {
 	public String[] sessionWrite(String[] in){
 		//in[0]: callID, [1]: operationFlag [2]: sessionID, [3]:versionNum [4]:timeOut [5]: message
 		//String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout() + "#" + s.getMessage();
-
+		for(String str : in){
+			System.out.println("in info:  " + str);
+		}
 		// the result should include callID
 		String[] result = new String[2];
 		result[0] = in[0]; // callID

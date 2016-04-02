@@ -32,11 +32,17 @@ import com.amazonaws.auth.PropertiesCredentials;
 import com.amazonaws.services.simpledb.AmazonSimpleDB;
 import com.amazonaws.services.simpledb.AmazonSimpleDBClient;
 import com.amazonaws.services.simpledb.model.Attribute;
+import com.amazonaws.services.simpledb.model.BatchPutAttributesRequest;
+import com.amazonaws.services.simpledb.model.CreateDomainRequest;
 import com.amazonaws.services.simpledb.model.Item;
+import com.amazonaws.services.simpledb.model.PutAttributesRequest;
+import com.amazonaws.services.simpledb.model.ReplaceableAttribute;
+import com.amazonaws.services.simpledb.model.ReplaceableItem;
 import com.amazonaws.services.simpledb.model.SelectRequest;
 import com.amazonaws.services.simpledb.model.SelectResult;
 
 import rpc.RPCclient;
+import rpc.RPCserver;
 import rpc.Server;
 import session.Session;
 
@@ -70,6 +76,12 @@ public class Manager extends HttpServlet {
         updateForFiveMinutes();
         initiaServerTable();
         System.out.println(serverTable);
+        try {
+			new RPCserver().start();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         // TODO Auto-generated constructor stub
     }
     
@@ -81,11 +93,20 @@ public class Manager extends HttpServlet {
 		// TODO Auto-generated method stub
     	AmazonSimpleDB sdb;
 		try {
+			String myDomain = "test1";
 			sdb = new AmazonSimpleDBClient(new PropertiesCredentials(
 			        Manager.class.getResourceAsStream("AwsCredentials.properties")));
 	        sdb.setEndpoint("sdb.us-west-2.amazonaws.com");
-	        String myDomain = "test1"; 
-	    	String query = "select * from `" + myDomain + "`";
+	        // add the localhost to simpledb
+	        sdb.createDomain(new CreateDomainRequest(myDomain));
+	        List<ReplaceableAttribute> sampleData = new ArrayList<ReplaceableAttribute>();
+	        sampleData.add(new ReplaceableAttribute("Index", "0", true));
+	        sampleData.add(new ReplaceableAttribute("Private_ip", "127.0.0.1", true));
+	        sampleData.add(new ReplaceableAttribute("Public_ip", "127.0.0.1", true));
+
+	        PutAttributesRequest pr = new PutAttributesRequest(myDomain, "Item_01", sampleData);
+	    	sdb.putAttributes(pr);
+	        String query = "select * from `" + myDomain + "`";
 	    	SelectRequest selectRequest = new SelectRequest(query);
 	    	SelectResult selectResult = sdb.select(selectRequest);
 	    	List<Item> items = selectResult.getItems();
@@ -150,6 +171,7 @@ public class Manager extends HttpServlet {
 		if(cookies != null){
 			for(Cookie cookie : cookies){
 				if(cookie.getName().equals(cookieName)){
+					System.out.println(cookie.getValue());
 					String[] infos = cookie.getValue().split("__");
 					String sId = cookie.getValue().split("__")[0];
 					int sVersion = Integer.parseInt(cookie.getValue().split("__")[1]);
@@ -160,10 +182,12 @@ public class Manager extends HttpServlet {
 					 ArrayList<Server> serverList= new ArrayList<Server>();
 					 for(int i = 2; i < infos.length; i++){
 						 serverList.add(serverTable.get(Integer.parseInt(infos[i])));
+						 
 //					 		serverList.add(infos[i]);
 					 }
-					 
+					 System.out.println("RPC read start");
 					 String fdbk = RPCclient.read(new Session(sId, sVersion), serverList);
+					 System.out.print("RPC read end with info: " + fdbk);
 					 String success = fdbk.split("#")[1];
 					 if(success.equals("false")){
 						 break;

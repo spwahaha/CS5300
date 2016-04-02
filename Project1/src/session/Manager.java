@@ -48,7 +48,7 @@ import session.Session;
 public class Manager extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Session s;
-	private String metadata = "1a";
+	private String metadata = "0";
 	private static final int cookieAge = 60 * 10;
 	private static final int sessionAge = 60 * 10 * 10;
 	private static final String cookieName = "CS5300PROJ1SESSION";
@@ -247,9 +247,9 @@ public class Manager extends HttpServlet {
 		// TODO Auto-generated method stub
 		Set<Server> serverSet = new HashSet<Server>();
 		Random generator = new Random();
-		Server[] values = (Server[]) serverTable.values().toArray();
+		Object[] values = (Object[]) serverTable.values().toArray();
 		while(serverSet.size() < num){
-			Server randomServer = values[generator.nextInt(values.length)];
+			Server randomServer = (Server)values[generator.nextInt(values.length)];
 			serverSet.add(randomServer);
 		}
 		return serverSet;

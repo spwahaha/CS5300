@@ -72,6 +72,13 @@ public class RPCclient {
 		return result;
 	}
 	
+	/**
+	 * This method should return a list of index of the server that save the session info
+	 * @param s
+	 * @param dest
+	 * @return
+	 * @throws IOException
+	 */
 	public static String write(Session s, Set<Server> dest) throws IOException{
 		int count = 0;
 		String callID =  UUID.randomUUID().toString();

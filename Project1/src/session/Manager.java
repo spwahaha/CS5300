@@ -8,12 +8,13 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
@@ -21,6 +22,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.simpledb.AmazonSimpleDBClient;
+import com.amazonaws.services.simpledb.model.Item;
+import com.amazonaws.services.simpledb.model.SelectRequest;
+import com.amazonaws.services.simpledb.model.SelectResult;
+
+import rpc.Server;
 import session.Session;
 
 
@@ -35,10 +43,12 @@ public class Manager extends HttpServlet {
 	private static final int cookieAge = 60 * 10;
 	private static final int sessionAge = 60 * 10 * 10;
 	private static final String cookieName = "CS5300PROJ1SESSION";
+	private static final String accessKey = "AKIAIOO6HTOHZF5LG65Q";
+	private static final String secretKey = "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";
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	// sessionInfo  key: 
-	public static HashMap<String, Session> sessionInfo = new HashMap<>();
-      
+	public static ConcurrentHashMap<String, Session> sessionInfo = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Integer, Server> serverTable = new ConcurrentHashMap<>();
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -47,11 +57,27 @@ public class Manager extends HttpServlet {
         super();
         
         updateForFiveMinutes();
-        
+        initiaIpTable();
         // TODO Auto-generated constructor stub
     }
     
-    // new thread to automatically check the session timeout
+    /**
+     * Get all the server info from the simpleDB
+     * and store them in the serverTable
+     */
+    private void initiaIpTable() {
+		// TODO Auto-generated method stub
+    	AmazonSimpleDBClient awsSimpleDBClient = new AmazonSimpleDBClient(
+    			new BasicAWSCredentials (accessKey, secretKey));
+    	String query = "select * from `test1`";
+    	SelectRequest selectRequest = new SelectRequest(query, true);
+    	SelectResult selectResult = awsSimpleDBClient.select(selectRequest);
+    	List<Item> items = selectResult.getItems();
+    	System.out.println(items);
+    	
+	}
+
+	// new thread to automatically check the session timeout
 	public void updateForFiveMinutes() {
 		final Runnable up = new Runnable() {
 			public void run() { 

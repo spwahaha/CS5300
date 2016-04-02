@@ -20,6 +20,7 @@ public class RPCclient {
 		if( s == null || s.length() == 0){
 			return result;
 		}
+		// result may exceed maxPacket size 
 		result = s.getBytes();
 		return result;
 	}
@@ -35,13 +36,14 @@ public class RPCclient {
 	}
 	
 	public static String read(Session s, List<Server> dest) throws IOException{
+		// no necessary to use uuid, a counter is just fine
 		String callID =  UUID.randomUUID().toString();
 		DatagramSocket rpcsocket = new DatagramSocket();
 		rpcsocket.setSoTimeout(timeout);
 		String result = ""; 
 		
 		byte[] outbuf = new byte[512];
-		
+		// 1 means read operation 
 		String out = callID + "#1#" + s.getSessionId()+ "#" + s.getVersion();
 		outbuf = encode(out);
 		
@@ -63,7 +65,7 @@ public class RPCclient {
 			}
 		}catch(SocketTimeoutException stoe){
 			recvpkt = null;
-		}
+		}// here, if its IOException, my retry receive 
 		result = decode(inbuf);
 		rpcsocket.close();
 		return result;
@@ -78,7 +80,11 @@ public class RPCclient {
 		
 		byte[] outbuf = new byte[maxPacket];
 		
-		int version = s.getVersion() + 1; 
+		// here, not necessary to increase the version number, version number should 
+		// be increased in manager
+//		int version = s.getVersion() + 1; 
+		
+		int version = s.getVersion();
 		String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout() + "#" + s.getMessage();
 		
 		outbuf = encode(out);
@@ -94,10 +100,10 @@ public class RPCclient {
 			DatagramPacket recvpkt = new DatagramPacket(inbuf, inbuf.length);
 			
 			try{
-			
 				while(count < wq){
 					recvpkt.setLength(inbuf.length);
 					rpcsocket.receive(recvpkt);
+					// do we need to check whether write is 
 					if(decode(inbuf).split("#")[0].equals(callID)){
 						count++;
 					}

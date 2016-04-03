@@ -69,7 +69,7 @@ public class RPCserver extends Thread{
 					System.out.println("output info:  " + str);
 				}
 //				if(output[1].equals("true")){
-					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#");
+					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#" + output[2] + "#");
 //				}
 			}
 			
@@ -81,7 +81,7 @@ public class RPCserver extends Thread{
 	
 	//input[0] -> callID, input[1] -> operationcode input[2] -> sessionID input[3] -> version
 	//input[4] -> expire_data input[5] -> message
-	//result include two string, String[0] -> flag, String[1] -> data
+	// result[0] callID, result[1] true or false, result[2] data
 	public String[] sessionRead(String[] in){
 
 		String[] result = new String[3];
@@ -108,6 +108,7 @@ public class RPCserver extends Thread{
 		return result;
 	}
 	
+	//result[0]:callID, result[1]:true/false, result[2]:serverID
 	public String[] sessionWrite(String[] in){
 		//in[0]: callID, [1]: operationFlag [2]: sessionID, [3]:versionNum [4]:timeOut [5]: message
 		//String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout() + "#" + s.getMessage();
@@ -115,7 +116,7 @@ public class RPCserver extends Thread{
 			System.out.println("in info:  " + str);
 		}
 		// the result should include callID
-		String[] result = new String[2];
+		String[] result = new String[3];
 		result[0] = in[0]; // callID
 		result[1] = "false";
 		if(in.length < 6){
@@ -133,6 +134,7 @@ public class RPCserver extends Thread{
 		System.out.println("put session in server");
 		Manager.sessionInfo.put(key, newSession);
 		result[1] = "true";
+		result[2] = ""+Manager.serverId;
 		return result;
 	}
 }

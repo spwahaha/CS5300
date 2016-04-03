@@ -10,11 +10,11 @@ AMI_LAUNCH_INDEX=0
 ItemNum=0
 ServerNum=1
 function initTomcat() {
-	echo $(yum -y install tomcat7-webapps tomcat7-docs-webapp tomcat7-admin-webapps)
+	echo $(yum -y install tomcat8-webapps tomcat8-docs-webapp tomcat8-admin-webapps)
 }
 
 function startTomcat(){
-	echo $(service tomcat7 start)
+	echo $(service tomcat8 start)
 	# echo $(sudo service tomcat8 stop)
 }
 
@@ -32,8 +32,12 @@ function insertData(){
 	LOCAL_IP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
 	PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
 	AMI_LAUNCH_INDEX=$(curl http://169.254.169.254/latest/meta-data/ami-launch-index)
+	SERVER_DATA=$"ami-launch-index:  $AMI_LAUNCH_INDEX TT RebootNum: 0"
+	echo "$SERVER_DATA">server_data.txt
+	echo $(mv /server_data.txt ~tomcat/webapps)
 	echo "ami-launch-index:  $AMI_LAUNCH_INDEX"
 	echo "ip: $IP"
+	echo $()
 	ATTRIBUTE='[{"Name": "Index","Value": ''"'"$AMI_LAUNCH_INDEX"'"''},{"Name":"Private_ip","Value":''"'"$LOCAL_IP"'"''},{"Name":"Public_ip","Value":''"'"$PUBLIC_IP"'"''}]'
 	echo $ATTRIBUTE
 	echo $(aws sdb put-attributes --domain-name test1 --item-name "item$AMI_LAUNCH_INDEX" --attributes "$ATTRIBUTE")
@@ -47,6 +51,7 @@ function saveData(){
 		ItemNum=$(aws sdb domain-metadata --domain-name test1 | grep "ItemCount" | sed -E 's/^[^0-9]*([0-9]+).*/\1/')
 	done
 	echo $(aws sdb select --select-expression "select * from test1" > "NodesDB.txt")
+	echo $()
 }
 
 function deployJava(){
@@ -55,14 +60,15 @@ function deployJava(){
 }
 
 function deployWar(){
-	while ! [[ -f ~/P1.war ]];
+	while ! [[ -f /home/ec2-user/P1.war ]];
 	do
 		sleep 2
 		echo "no file found"
 	done
 	echo "file found"
-	echo $(mv ~/P1.war /usr/share/tomcat7/webapps)
+	echo $(mv /home/ec2-user/P1.war ~tomcat/webapps)
 	echo "move successfully"
+	echo $(mv /NodesDB.txt ~tomcat/webapps)
 }
 # echo $(cd ~)
 deployJava
@@ -71,4 +77,4 @@ initSdb
 insertData
 saveData
 startTomcat
-# deployWar
+deployWar

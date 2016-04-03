@@ -106,30 +106,37 @@ public class RPCclient {
 		
 		while(!done){
 			for(Server server : dest){
+				System.out.println("dest server:  " + server);
 				DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.private_ip, server.port);
 				rpcsocket.send(sendpkt);
 			}
-			
+			System.out.println("retrying");
 			byte[] inbuf = new byte[maxPacket];
 			DatagramPacket recvpkt = new DatagramPacket(inbuf, inbuf.length);
-			
 			try{
 				while(count < wq){
 					recvpkt.setLength(inbuf.length);
 					rpcsocket.receive(recvpkt);
 					// do we need to check whether write is 
+					System.out.println("inbuf info:  " + decode(inbuf));
 					if(decode(inbuf).split("#")[0].equals(callID)){
 						count++;
+						result += "__" + decode(inbuf).split("#")[2];
+					}
+					if(count >= wq){
+						done = true;
 					}
 				}
-				done = true;
+//				done = true;
 			}catch(SocketTimeoutException stoe){
 				recvpkt = null;
 			}
-			result = decode(inbuf);
+//			result = decode(inbuf);
 		}
 		rpcsocket.close();
-		return result;
+//		return result;
+		
+		return result.substring(2);
 	}
 	
 }

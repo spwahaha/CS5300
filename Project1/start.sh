@@ -51,12 +51,21 @@ function transferFile(){
 	sleep 10
 	for x in $arr
 	do
-		TRANS=$(scp -i -o StrictHostKeyChecking=no "zp01-key-pair-uswest2.pem" P1.war "$x" )
-	    echo "$x"
+		while [[ true ]]; do
+		{
+			echo "$x"
+			$(scp -i "zp01-key-pair-uswest2.pem" P1.war "$x") && break
+		}||{
+				echo "transmission faild and retry"
+				sleep 2
+			}
+		done
+		# TRANS=$(scp -i "zp01-key-pair-uswest2.pem" P1.war "$x")
+		# echo "TransInfo: $TRANS"
 	done
 }
 
 # scp -i "zp01-key-pair-uswest2.pem" -o StrictHostKeyChecking=no P1.war ec2-user@52.34.245.226:P1.war
 initSdb
 initInstance
-# transferFile
+transferFile

@@ -1,6 +1,7 @@
 package session;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -66,15 +68,24 @@ public class Manager extends HttpServlet {
     public static ConcurrentHashMap<Integer, Server> serverTable = new ConcurrentHashMap<>();
     public static final int R = 1;
     public static final int W = 1;
+    public static int serverId = 0;
+    public static int rebootNum = 0;
+    public static int sessionCounter = 0;
+    public String debugInfo = "";
     /**
      * @see HttpServlet#HttpServlet()
      */
 
     public Manager() {
         super();
-        
+        // TODO Auto-generated constructor stub
+    }
+    
+	@Override
+	public void init() {
         updateForFiveMinutes();
         initiaServerTable();
+        setServerData();
         System.out.println(serverTable);
         try {
 			new RPCserver().start();
@@ -82,8 +93,7 @@ public class Manager extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        // TODO Auto-generated constructor stub
-    }
+	}
     
     /**
      * Get all the server info from the simpleDB
@@ -98,11 +108,12 @@ public class Manager extends HttpServlet {
 			        Manager.class.getResourceAsStream("AwsCredentials.properties")));
 	        sdb.setEndpoint("sdb.us-west-2.amazonaws.com");
 	        // add the localhost to simpledb
+	        
 	        sdb.createDomain(new CreateDomainRequest(myDomain));
 	        List<ReplaceableAttribute> sampleData = new ArrayList<ReplaceableAttribute>();
-	        sampleData.add(new ReplaceableAttribute("Index", "0", true));
-	        sampleData.add(new ReplaceableAttribute("Private_ip", "192.168.23.2", true));
-	        sampleData.add(new ReplaceableAttribute("Public_ip", "192.168.23.2", true));
+	        sampleData.add(new ReplaceableAttribute("Index", "1", true));
+	        sampleData.add(new ReplaceableAttribute("Private_ip", "127.0.0.1", true));
+	        sampleData.add(new ReplaceableAttribute("Public_ip", "127.0.0.1", true));
 
 	        PutAttributesRequest pr = new PutAttributesRequest(myDomain, "Item_01", sampleData);
 	    	sdb.putAttributes(pr);
@@ -136,6 +147,34 @@ public class Manager extends HttpServlet {
 		}
 
 	}
+    
+    public void setServerData(){
+    	// use the following path when export the war file
+//    	String path = getServletContext().getRealPath("/");
+////    	debugInfo += "  path1:  " + path;
+//    	path += "../server_data.txt";
+////    	debugInfo += "  path2:  " + path;
+    	
+    	// use the following path when debugging in eclipse
+    	String path = getServletContext().getRealPath("/server_data.txt");
+    	
+    	try {
+			BufferedReader br = new BufferedReader(new FileReader(path));
+			String line = br.readLine();
+			debugInfo += " file content " + line;
+			System.out.println("server data:   " + line);
+			String index = line.split("TT")[0].split(":")[1].trim();
+			String reboot = line.split("TT")[1].split(":")[1].trim();
+			this.rebootNum = Integer.parseInt(reboot);
+			this.serverId = Integer.parseInt(index);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	
+    }
+    
 
 	// new thread to automatically check the session timeout
 	public void updateForFiveMinutes() {
@@ -187,15 +226,20 @@ public class Manager extends HttpServlet {
 					 }
 					 System.out.println("RPC read start");
 					 String fdbk = "";
+					 int counter = 0;
 					 do{
-					 fdbk = RPCclient.read(new Session(sId, sVersion), serverList);
+						 counter++;
+						 fdbk = RPCclient.read(new Session(sId, sVersion), serverList);
+					 }while(fdbk.split("#").length < 1 && counter < 3);
 					 System.out.print("RPC read end with info: " + fdbk);
-					 }while(fdbk.split("#").length < 1);
-					 
-					 String success = fdbk.split("#")[1];
-					 if(success.equals("false")){
+					 if(fdbk.split("#").length < 2 || fdbk.split("#")[1].equals("false")){
 						 break;
 					 }
+//					 
+//					 String success = fdbk.split("#")[1];
+//					 if(success.equals("false")){
+//						 break;
+//					 }
 					 
 					 String msg = fdbk.split("#")[2];
 					 s = new Session(sId, sVersion + 1, msg, this.sessionAge);
@@ -228,7 +272,7 @@ public class Manager extends HttpServlet {
 		
 		// This is a new user, the server will generate a new session
 		if(newbee != false){
-			String sessionID = UUID.randomUUID().toString();
+			String sessionID = getSessionID();
 			int version = 1;
 			s = new Session(sessionID, version, "Hello world", sessionAge); 
 			// sessionInfo 
@@ -237,15 +281,23 @@ public class Manager extends HttpServlet {
 	    }
 		
 
-
-		
 		Map<String, String[]> map = request.getParameterMap();
+		
+		if(map.containsKey("Replace")){
+			s.setMessage(request.getParameter("Replace"));
+	    }
+		
+		// we can put the RPC write code here, 
+//		 Set serverSet = RPCwrite(s);
+		Set<Server> serverSet = getWriteServer(W);
+		metadata = RPCclient.write(s, serverSet);
+		System.out.println("write Result:  " + metadata);
+		// and then put the serverSet info in the cookie info
 		
 		//check what button the user has pressed
 		if(map.containsKey("refresh")){
 	    	update(request,response,s);
 	    }else if(map.containsKey("logout")){
-	    	
 	    	logout(request,response,s);
 	    }else if(map.containsKey("Replace")){
 	    	
@@ -261,16 +313,18 @@ public class Manager extends HttpServlet {
 			
 	    	sessionCookie.setMaxAge(cookieAge);
 			response.setContentType("text/html"); 
+			System.out.println("cookieValue:  " + sessionCookie.getValue());
 			response.addCookie(sessionCookie);
 	    }
 		
-		// we can put the RPC write code here, 
-//		 Set serverSet = RPCwrite(s);
-		Set<Server> serverSet = getWriteServer(W);
-		String writeResult = RPCclient.write(s, serverSet);
-		System.out.println("write Result:  " + writeResult);
-		// and then put the serverSet info in the cookie info
+
 		
+	}
+	
+	private String getSessionID(){
+		String sessionId = this.serverId + "-" + this.rebootNum + "-" + this.sessionCounter;
+		this.sessionCounter++;
+		return sessionId;
 	}
 	
 	private Set<Server> getWriteServer(int num) {
@@ -373,7 +427,7 @@ public class Manager extends HttpServlet {
 			output = output.replace("#timeout#", "");
 			output = output.replace("#begintime#", "");
 		}
-		return output;
+		return output + debugInfo;
 	}
 
 	/**

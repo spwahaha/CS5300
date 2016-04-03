@@ -1,6 +1,6 @@
 {
     "OwnerId": "208580179646", 
-    "ReservationId": "r-48f9c98e", 
+    "ReservationId": "r-24a1a7e1", 
     "Groups": [], 
     "Instances": [
         {
@@ -14,14 +14,14 @@
                 "Name": "pending"
             }, 
             "EbsOptimized": false, 
-            "LaunchTime": "2016-04-01T23:15:26.000Z", 
-            "PrivateIpAddress": "172.31.33.187", 
+            "LaunchTime": "2016-04-03T02:14:45.000Z", 
+            "PrivateIpAddress": "172.31.22.205", 
             "ProductCodes": [], 
             "VpcId": "vpc-d28d78b6", 
             "StateTransitionReason": "", 
-            "InstanceId": "i-b625636e", 
+            "InstanceId": "i-dd24161a", 
             "ImageId": "ami-c229c0a2", 
-            "PrivateDnsName": "ip-172-31-33-187.us-west-2.compute.internal", 
+            "PrivateDnsName": "ip-172-31-22-205.us-west-2.compute.internal", 
             "KeyName": "zp01-key-pair-uswest2", 
             "SecurityGroups": [
                 {
@@ -30,30 +30,30 @@
                 }
             ], 
             "ClientToken": "", 
-            "SubnetId": "subnet-56efff21", 
+            "SubnetId": "subnet-38c43b5c", 
             "InstanceType": "t2.micro", 
             "NetworkInterfaces": [
                 {
                     "Status": "in-use", 
-                    "MacAddress": "06:10:a2:94:86:c7", 
+                    "MacAddress": "02:c2:24:4d:93:53", 
                     "SourceDestCheck": true, 
                     "VpcId": "vpc-d28d78b6", 
                     "Description": "", 
-                    "NetworkInterfaceId": "eni-eba6efa1", 
+                    "NetworkInterfaceId": "eni-cc810bb7", 
                     "PrivateIpAddresses": [
                         {
-                            "PrivateDnsName": "ip-172-31-33-187.us-west-2.compute.internal", 
+                            "PrivateDnsName": "ip-172-31-22-205.us-west-2.compute.internal", 
                             "Primary": true, 
-                            "PrivateIpAddress": "172.31.33.187"
+                            "PrivateIpAddress": "172.31.22.205"
                         }
                     ], 
-                    "PrivateDnsName": "ip-172-31-33-187.us-west-2.compute.internal", 
+                    "PrivateDnsName": "ip-172-31-22-205.us-west-2.compute.internal", 
                     "Attachment": {
                         "Status": "attaching", 
                         "DeviceIndex": 0, 
                         "DeleteOnTermination": true, 
-                        "AttachmentId": "eni-attach-fce9480a", 
-                        "AttachTime": "2016-04-01T23:15:26.000Z"
+                        "AttachmentId": "eni-attach-145da2e3", 
+                        "AttachTime": "2016-04-03T02:14:45.000Z"
                     }, 
                     "Groups": [
                         {
@@ -61,16 +61,16 @@
                             "GroupId": "sg-e3ce7584"
                         }
                     ], 
-                    "SubnetId": "subnet-56efff21", 
+                    "SubnetId": "subnet-38c43b5c", 
                     "OwnerId": "208580179646", 
-                    "PrivateIpAddress": "172.31.33.187"
+                    "PrivateIpAddress": "172.31.22.205"
                 }
             ], 
             "SourceDestCheck": true, 
             "Placement": {
                 "Tenancy": "default", 
                 "GroupName": "", 
-                "AvailabilityZone": "us-west-2b"
+                "AvailabilityZone": "us-west-2a"
             }, 
             "Hypervisor": "xen", 
             "BlockDeviceMappings": [], 

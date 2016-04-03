@@ -8,7 +8,7 @@ LOCAL_IP=0
 PUBLIC_IP=0
 AMI_LAUNCH_INDEX=0
 ItemNum=0
-ServerNum=1
+ServerNum=2
 function initTomcat() {
 	echo $(yum -y install tomcat8-webapps tomcat8-docs-webapp tomcat8-admin-webapps)
 }
@@ -60,13 +60,13 @@ function deployJava(){
 }
 
 function deployWar(){
-	while ! [[ -f /home/ec2-user/P1.war ]];
+	while ! [[ -f /home/ec2-user/Project1.war ]];
 	do
 		sleep 2
 		echo "no file found"
 	done
 	echo "file found"
-	echo $(mv /home/ec2-user/P1.war ~tomcat/webapps)
+	echo $(mv /home/ec2-user/Project1.war ~tomcat/webapps)
 	echo "move successfully"
 	echo $(mv /NodesDB.txt ~tomcat/webapps)
 }

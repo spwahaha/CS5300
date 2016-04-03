@@ -21,8 +21,8 @@ public class Server {
 	
 	public Server(String public_ip, String private_ip){
 		try {
-			this.private_ip = InetAddress.getByName(public_ip);
-			this.public_ip = InetAddress.getByName(private_ip);
+			this.private_ip = InetAddress.getByName(private_ip);
+			this.public_ip = InetAddress.getByName(public_ip);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			System.out.print("unknown host");

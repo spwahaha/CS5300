@@ -129,6 +129,7 @@ public class Manager extends HttpServlet {
 	    			switch (attribute.getName()){
 	    				case "Public_ip":
 	    					public_ip = attribute.getValue();
+	    					System.out.println("Public_ip:  " + attribute.getValue());
 	    					break;
 	    				case "Private_ip":
 	    					private_ip = attribute.getValue();
@@ -291,6 +292,7 @@ public class Manager extends HttpServlet {
 //		 Set serverSet = RPCwrite(s);
 		Set<Server> serverSet = getWriteServer(W);
 		metadata = RPCclient.write(s, serverSet);
+		metadata = "0";
 		System.out.println("write Result:  " + metadata);
 		// and then put the serverSet info in the cookie info
 		
@@ -330,12 +332,14 @@ public class Manager extends HttpServlet {
 	private Set<Server> getWriteServer(int num) {
 		// TODO Auto-generated method stub
 		Set<Server> serverSet = new HashSet<Server>();
-		Random generator = new Random();
-		Object[] values = (Object[]) serverTable.values().toArray();
-		while(serverSet.size() < num){
-			Server randomServer = (Server)values[generator.nextInt(values.length)];
-			serverSet.add(randomServer);
-		}
+//		Random generator = new Random();
+//		Object[] values = (Object[]) serverTable.values().toArray();
+//		while(serverSet.size() < num){
+//			Server randomServer = (Server)values[generator.nextInt(values.length)];
+//			serverSet.add(randomServer);
+//		}
+		
+		serverSet.add(serverTable.get(0));
 		return serverSet;
 	}
 

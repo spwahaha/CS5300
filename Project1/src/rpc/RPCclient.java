@@ -52,7 +52,7 @@ public class RPCclient {
 		
 		for(Server server : dest){
 			System.out.println("send request to: " + dest);
-			DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.private_ip, server.port);
+			DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.public_ip, server.port);
 			rpcsocket.send(sendpkt);
 		}
 		
@@ -106,8 +106,8 @@ public class RPCclient {
 		
 		while(!done){
 			for(Server server : dest){
-				System.out.println("dest server:  " + server);
-				DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.private_ip, server.port);
+				System.out.println("write dest server:  " + server);
+				DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.public_ip, server.port);
 				rpcsocket.send(sendpkt);
 			}
 			System.out.println("retrying");

@@ -16,8 +16,8 @@ function initSdb(){
 	echo $(aws configure set aws_secret_access_key $SECRET_ACCESS_KEY)
 	echo $(aws configure set default.region us-west-2)
 	echo $(aws configure set preview.sdb true) 
-	echo $(aws sdb delete-domain --domain-name test1) # clear domain
-	echo $(aws sdb create-domain --domain-name test1) # creat db
+	# echo $(aws sdb delete-domain --domain-name test1) # clear domain
+	# echo $(aws sdb create-domain --domain-name test1) # creat db
 	# ItemNum=$(aws sdb domain-metadata --domain-name test1 | grep "ItemCount" | sed -E 's/^[^0-9]*([0-9]+).*/\1/')
 	# echo "ItemCount $ItemNum" # get tuple number in db
 	# if $ItemNum != 0, we need to delete all the tuples in original db
@@ -35,7 +35,7 @@ function initInstance(){
 }
 
 function transferFile(){
-	INFO=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" | grep "PublicIpAddress" | sed -E 's/.*["]([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/ec2-user@\1:P1.war/')
+	INFO=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" | grep "PublicIpAddress" | sed -E 's/.*["]([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/ec2-user@\1:Project1.war/')
 	# INFO=$(cat running.txt | grep "PublicIpAddress")
 	# INFO=$(cat running.txt | grep "PublicIpAddress" | sed -E 's/.*["]([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
 
@@ -43,7 +43,7 @@ function transferFile(){
 	echo ${#INFO}
 	while [[ ${#INFO} -eq 0 ]]; do
 	 	sleep 2
-	 	INFO=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" | grep "PublicIpAddress" | sed -E 's/.*["]([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/ec2-user@\1:P1.war/')
+	 	INFO=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" | grep "PublicIpAddress" | sed -E 's/.*["]([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/ec2-user@\1:Project1.war/')
 		echo $INFO  
 	done 
 
@@ -54,7 +54,7 @@ function transferFile(){
 		while [[ true ]]; do
 		{
 			echo "$x"
-			$(scp -i "zp01-key-pair-uswest2.pem" P1.war "$x") && break
+			$(scp -i "zp01-key-pair-uswest2.pem" Project1.war "$x") && break
 		}||{
 				echo "transmission faild and retry"
 				sleep 2

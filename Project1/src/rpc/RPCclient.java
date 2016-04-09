@@ -13,7 +13,7 @@ import session.Session;
 public class RPCclient {
 	public final static int maxPacket = 512;
 	public final static int timeout = 2000;
-	public final static int wq = 1;
+	public final static int wq = 2;
 
 	public static byte[] encode(String s){
 		byte[] result = new byte[maxPacket];

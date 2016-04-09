@@ -65,8 +65,8 @@ public class Manager extends HttpServlet {
 	// sessionInfo  key: 
 	public static ConcurrentHashMap<String, Session> sessionInfo = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Integer, Server> serverTable = new ConcurrentHashMap<>();
-    public static final int R = 1;
-    public static final int W = 1;
+    public static final int R = 2;
+    public static final int W = 3;
     public static int serverId = 0;
     public static int rebootNum = 0;
     public static int sessionCounter = 0;
@@ -108,14 +108,14 @@ public class Manager extends HttpServlet {
 	        sdb.setEndpoint("sdb.us-west-2.amazonaws.com");
 	        // add the localhost to simpledb
 	        
-	        sdb.createDomain(new CreateDomainRequest(myDomain));
-	        List<ReplaceableAttribute> sampleData = new ArrayList<ReplaceableAttribute>();
-	        sampleData.add(new ReplaceableAttribute("Index", "1", true));
-	        sampleData.add(new ReplaceableAttribute("Private_ip", "127.0.0.1", true));
-	        sampleData.add(new ReplaceableAttribute("Public_ip", "127.0.0.1", true));
-
-	        PutAttributesRequest pr = new PutAttributesRequest(myDomain, "Item_01", sampleData);
-	    	sdb.putAttributes(pr);
+//	        sdb.createDomain(new CreateDomainRequest(myDomain));
+//	        List<ReplaceableAttribute> sampleData = new ArrayList<ReplaceableAttribute>();
+//	        sampleData.add(new ReplaceableAttribute("Index", "1", true));
+//	        sampleData.add(new ReplaceableAttribute("Private_ip", "127.0.0.1", true));
+//	        sampleData.add(new ReplaceableAttribute("Public_ip", "127.0.0.1", true));
+//
+//	        PutAttributesRequest pr = new PutAttributesRequest(myDomain, "Item_01", sampleData);
+//	    	sdb.putAttributes(pr);
 	        String query = "select * from `" + myDomain + "`";
 	    	SelectRequest selectRequest = new SelectRequest(query);
 	    	SelectResult selectResult = sdb.select(selectRequest);

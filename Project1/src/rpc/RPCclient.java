@@ -108,7 +108,11 @@ public class RPCclient {
 			for(Server server : dest){
 				System.out.println("write dest server:  " + server);
 				DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.public_ip, server.port);
-				rpcsocket.send(sendpkt);
+				try{
+					rpcsocket.send(sendpkt);
+				}catch(IOException e){
+					continue;
+				}
 			}
 			System.out.println("retrying");
 			byte[] inbuf = new byte[maxPacket];

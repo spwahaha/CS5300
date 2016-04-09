@@ -57,7 +57,8 @@ public class Manager extends HttpServlet {
 	private Session s;
 	private String metadata = "0";
 	private static final int cookieAge = 60 * 10 * 10;
-	private static final int sessionAge = 60 * 10 * 10 * 1000;
+//	private static final int sessionAge = 60 * 10 * 10 * 1000;
+	private static final int sessionAge = 60 * 10 * 10;
 	private static final String cookieName = "CS5300PROJ1SESSION";
 	private static final String accessKey = "AKIAIOO6HTOHZF5LG65Q";
 	private static final String secretKey = "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";
@@ -180,6 +181,7 @@ public class Manager extends HttpServlet {
 	public void updateForFiveMinutes() {
 		final Runnable up = new Runnable() {
 			public void run() { 
+				System.out.println("Collection executed!!");
 				Date date = new Date();
 				Timestamp now = new Timestamp(date.getTime());
 				Iterator<String> keys = sessionInfo.keySet().iterator();
@@ -193,7 +195,8 @@ public class Manager extends HttpServlet {
 		};
 		
 		// every five minutes will check the timeout
-		scheduler.scheduleAtFixedRate(up, 5, 5, TimeUnit.MINUTES);
+		scheduler.scheduleAtFixedRate(up, 5, 5, TimeUnit.SECONDS);
+		
 	}
     
    
@@ -207,9 +210,11 @@ public class Manager extends HttpServlet {
 		
 		//check it is new user
 		boolean newbee = true;
+		int readable = 0;
 		if(cookies != null){
 			for(Cookie cookie : cookies){
 				if(cookie.getName().equals(cookieName)){
+				
 					System.out.println(cookie.getValue());
 					String[] infos = cookie.getValue().split("__");
 					String sId = cookie.getValue().split("__")[0];
@@ -231,11 +236,16 @@ public class Manager extends HttpServlet {
 						 counter++;
 						 fdbk = RPCclient.read(new Session(sId, sVersion), serverList);
 					 }while(fdbk.split("#").length < 1 && counter < 3);
+					 if(counter >= 3|| fdbk.split("#").length < 2){
+						readable = 1;
+						break;
+					 }
 					 System.out.print("RPC read end with info: " + fdbk);
-					 if(fdbk.split("#").length < 2 || fdbk.split("#")[1].equals("false")){
+					 if(fdbk.split("#")[1].equals("false")){
+						 readable = 2;
 						 break;
 					 }
-//					 
+					 
 //					 String success = fdbk.split("#")[1];
 //					 if(success.equals("false")){
 //						 break;
@@ -244,40 +254,18 @@ public class Manager extends HttpServlet {
 					 String msg = fdbk.split("#")[2];
 					 s = new Session(sId, sVersion + 1, msg, this.sessionAge);
 					 newbee = false;
-					 
-//					 update
-//					 
-//					 s = PRCWrite(.....s, timeout);
-					 
-//					if(sessionInfo.containsKey(id_ver)){
-//						Date date = new Date();
-//						Timestamp now = new Timestamp(date.getTime());	
-//						s = sessionInfo.get(id_ver);
-//						//double check the session is timeout
-//						if(now.before(s.getTimeout())){
-//							Long time = date.getTime();
-//							s.setTimeout(new Timestamp(time + sessionAge));
-//							s.setBegin(new Timestamp(time));
-//							s.setVersion(sessionInfo.get(id_ver).getVersion()+1);
-//							
-//							newbee = false;
-//							break;
-//						}else{
-//							sessionInfo.remove(id_ver);
-//						}
-//					}
 				}
 			}
 		}
 		
 		// This is a new user, the server will generate a new session
+		
 		if(newbee != false){
 			String sessionID = getSessionID();
 			int version = 1;
 			s = new Session(sessionID, version, "Hello world", sessionAge); 
 			// sessionInfo 
 			String id_ver = s.getSessionId() + "_" + s.getVersion();
-//			sessionInfo.put(id_ver, s);
 	    }
 		
 
@@ -287,18 +275,20 @@ public class Manager extends HttpServlet {
 			s.setMessage(request.getParameter("Replace"));
 	    }
 		
-		// we can put the RPC write code here, 
-//		 Set serverSet = RPCwrite(s);
+// 		we can put the RPC write code here, 
+//		Set serverSet = RPCwrite(s);
 		Set<Server> serverSet = getWriteServer(W);
 		metadata = RPCclient.write(s, serverSet);
-		metadata = "0";
+		//metadata = "0";
 		System.out.println("write Result:  " + metadata);
 		// and then put the serverSet info in the cookie info
 		
 		//check what button the user has pressed
 		if(map.containsKey("refresh")){
+			
 	    	update(request,response,s);
 	    }else if(map.containsKey("logout")){
+	    	
 	    	logout(request,response,s);
 	    }else if(map.containsKey("Replace")){
 	    	
@@ -309,6 +299,14 @@ public class Manager extends HttpServlet {
 	    
 	    	Cookie sessionCookie = new Cookie(cookieName, s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
 	    	
+	    	//show we cannot find the session
+	    	if(readable == 1){
+	    		output = output.replace("#cookieId#", "The session time out " + "#cookieId#");
+	    	}
+	    	if(readable == 2){
+	    		output = output.replace("#cookieId#", "The session do not find " + "#cookieId#");
+	    	}
+	    	
 	    	output = output.replace("#cookieId#", sessionCookie.getValue());
 	    	out.println(output);
 			
@@ -317,9 +315,6 @@ public class Manager extends HttpServlet {
 			System.out.println("cookieValue:  " + sessionCookie.getValue());
 			response.addCookie(sessionCookie);
 	    }
-		
-
-		
 	}
 	
 	private String getSessionID(){
@@ -331,14 +326,14 @@ public class Manager extends HttpServlet {
 	private Set<Server> getWriteServer(int num) {
 		// TODO Auto-generated method stub
 		Set<Server> serverSet = new HashSet<Server>();
-//		Random generator = new Random();
-//		Object[] values = (Object[]) serverTable.values().toArray();
-//		while(serverSet.size() < num){
-//			Server randomServer = (Server)values[generator.nextInt(values.length)];
-//			serverSet.add(randomServer);
-//		}
+		Random generator = new Random();
+		Object[] values = (Object[]) serverTable.values().toArray();
+		while(serverSet.size() < num){
+			Server randomServer = (Server)values[generator.nextInt(values.length)];
+			serverSet.add(randomServer);
+		}
 		
-		serverSet.add(serverTable.get(0));
+//		serverSet.add(serverTable.get(0));
 		return serverSet;
 	}
 
@@ -369,7 +364,6 @@ public class Manager extends HttpServlet {
 		s = null;
 	
     	String output = readFile(s); 
-    	
     	
     	Cookie sessionCookie = new Cookie(cookieName, "");
     	output = output.replace("#cookieId#", sessionCookie.getValue());

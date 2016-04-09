@@ -13,6 +13,7 @@
 <servlet>
     <servlet-name>session.Manager</servlet-name>
     <servlet-class>session.Manager</servlet-class>
+    <load-on-startup>1</load-on-startup>
 </servlet>
 
 <servlet-mapping>

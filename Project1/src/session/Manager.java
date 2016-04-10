@@ -64,13 +64,14 @@ public class Manager extends HttpServlet {
 	private static final String cookieName = "CS5300PROJ1SESSION";
 	private static final String accessKey = "AKIAIOO6HTOHZF5LG65Q";
 	private static final String secretKey = "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";
+	private static final String cookieDomain = ".bigdata.systems";
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	// sessionInfo  key: 
 	public static ConcurrentHashMap<String, Session> sessionInfo = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Integer, Server> serverTable = new ConcurrentHashMap<>();
     public static final int R = 2;
     public static final int W = 3;
-    public static final int WQ = 3;
+    public static final int WQ = 2;
     public static int serverId = 0;
     public static int rebootNum = 0;
     public static int sessionCounter = 0;
@@ -243,8 +244,8 @@ public class Manager extends HttpServlet {
 		int readable = 0;
 		if(cookies != null){
 			for(Cookie cookie : cookies){
+//				if(cookie.getName().equals(cookieName) && cookie.getDomain() != null && cookie.getDomain().equals(cookieDomain)){
 				if(cookie.getName().equals(cookieName)){
-				
 					System.out.println(cookie.getValue());
 					String[] infos = cookie.getValue().split("__");
 					String sId = cookie.getValue().split("__")[0];
@@ -386,6 +387,7 @@ public class Manager extends HttpServlet {
     	out.println(output);
     	
 		sessionCookie.setMaxAge(cookieAge);
+		sessionCookie.setDomain(cookieDomain);
 		response.setContentType("text/html"); 
 		response.addCookie(sessionCookie);		 	 
 	}
@@ -406,6 +408,7 @@ public class Manager extends HttpServlet {
     	output = output.replace("#cookieId#", sessionCookie.getValue());
     	
     	out.println(output);
+		sessionCookie.setDomain(cookieDomain);
 		sessionCookie.setMaxAge(0);
 		response.setContentType("text/html"); 
 		response.addCookie(sessionCookie);
@@ -430,6 +433,7 @@ public class Manager extends HttpServlet {
     	out.println(output);
     	
     	sessionCookie.setMaxAge(sessionAge);
+		sessionCookie.setDomain(cookieDomain);
 		response.setContentType("text/html"); 
 		response.addCookie(sessionCookie);
 		

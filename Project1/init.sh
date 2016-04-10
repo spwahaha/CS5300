@@ -77,6 +77,7 @@ function deployWar1(){
 	echo $(mv /NodesDB.txt ~tomcat/webapps)
 	echo $(aws s3 cp s3://edu-cornell-cs-cs5300s16-zp55/Project1.war ~tomcat/webapps/Project1.war)
 	echo $(aws s3 cp s3://edu-cornell-cs-cs5300s16-zp55/restart.sh ~tomcat/webapps/restart.sh)
+	echo $(chmod 777 ~tomcat/webapps/restart.sh)
 }
 # echo $(cd ~)
 deployJava

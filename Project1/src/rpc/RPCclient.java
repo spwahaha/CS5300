@@ -7,6 +7,8 @@ import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import session.Manager;
 import session.Session;
 
 
@@ -118,16 +120,18 @@ public class RPCclient {
 			byte[] inbuf = new byte[maxPacket];
 			DatagramPacket recvpkt = new DatagramPacket(inbuf, inbuf.length);
 			try{
-				while(count < wq){
+				while(count < Manager.WQ){
 					recvpkt.setLength(inbuf.length);
 					rpcsocket.receive(recvpkt);
 					// do we need to check whether write is 
 					System.out.println("inbuf info:  " + decode(inbuf));
 					if(decode(inbuf).split("#")[0].equals(callID)){
+						int serverIndex = Integer.parseInt(decode(inbuf).split("#")[2]);
+						dest.remove(Manager.serverTable.get(serverIndex));
 						count++;
 						result += "__" + decode(inbuf).split("#")[2];
 					}
-					if(count >= wq){
+					if(count >= Manager.WQ){
 						done = true;
 					}
 				}

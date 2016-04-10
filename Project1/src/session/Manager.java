@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +36,7 @@ import com.amazonaws.services.simpledb.AmazonSimpleDBClient;
 import com.amazonaws.services.simpledb.model.Attribute;
 import com.amazonaws.services.simpledb.model.BatchPutAttributesRequest;
 import com.amazonaws.services.simpledb.model.CreateDomainRequest;
+import com.amazonaws.services.simpledb.model.DeleteDomainRequest;
 import com.amazonaws.services.simpledb.model.Item;
 import com.amazonaws.services.simpledb.model.PutAttributesRequest;
 import com.amazonaws.services.simpledb.model.ReplaceableAttribute;
@@ -66,8 +68,9 @@ public class Manager extends HttpServlet {
 	// sessionInfo  key: 
 	public static ConcurrentHashMap<String, Session> sessionInfo = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Integer, Server> serverTable = new ConcurrentHashMap<>();
-    public static final int R = 2;
-    public static final int W = 3;
+    public static final int R = 1;
+    public static final int W = 1;
+    public static final int WQ = 1;
     public static int serverId = 0;
     public static int rebootNum = 0;
     public static int sessionCounter = 0;
@@ -83,6 +86,7 @@ public class Manager extends HttpServlet {
     
 	@Override
 	public void init() {
+		System.out.println("P1 Initialization");
         updateForFiveMinutes();
         initiaServerTable();
         setServerData();
@@ -107,9 +111,34 @@ public class Manager extends HttpServlet {
 			sdb = new AmazonSimpleDBClient(new PropertiesCredentials(
 			        Manager.class.getResourceAsStream("AwsCredentials.properties")));
 	        sdb.setEndpoint("sdb.us-west-2.amazonaws.com");
+	        // delete the domain first 
+//	        sdb.deleteDomain(new DeleteDomainRequest(myDomain));
 	        // add the localhost to simpledb
 	        
-//	        sdb.createDomain(new CreateDomainRequest(myDomain));
+	        sdb.createDomain(new CreateDomainRequest(myDomain));
+	        List<ReplaceableAttribute> sampleData1 = new ArrayList<ReplaceableAttribute>();
+	        sampleData1.add(new ReplaceableAttribute("Index", "0", true));
+	        sampleData1.add(new ReplaceableAttribute("Private_ip", "127.0.0.1", true));
+	        sampleData1.add(new ReplaceableAttribute("Public_ip", "127.0.0.1", true));
+	        PutAttributesRequest pr = new PutAttributesRequest(myDomain, "Item_00", sampleData1);
+//	        
+//	        List<ReplaceableAttribute> sampleData2 = new ArrayList<ReplaceableAttribute>();
+//	        sampleData2.add(new ReplaceableAttribute("Index", "1", true));
+//	        sampleData2.add(new ReplaceableAttribute("Private_ip", "10.128.9.67", true));
+//	        sampleData2.add(new ReplaceableAttribute("Public_ip", "10.128.9.67", true));
+//	        PutAttributesRequest pr2 = new PutAttributesRequest(myDomain, "Item_01", sampleData2);
+//	        
+//	        List<ReplaceableAttribute> sampleData3 = new ArrayList<ReplaceableAttribute>();
+//	        sampleData3.add(new ReplaceableAttribute("Index", "2", true));
+//	        sampleData3.add(new ReplaceableAttribute("Private_ip", "10.128.11.166", true));
+//	        sampleData3.add(new ReplaceableAttribute("Public_ip", "10.128.11.166", true));
+//	        PutAttributesRequest pr3 = new PutAttributesRequest(myDomain, "Item_02", sampleData3);
+//	        
+//	        
+//	        
+	    	sdb.putAttributes(pr);
+//	    	sdb.putAttributes(pr2);
+//	    	sdb.putAttributes(pr3);
 //	        List<ReplaceableAttribute> sampleData = new ArrayList<ReplaceableAttribute>();
 //	        sampleData.add(new ReplaceableAttribute("Index", "1", true));
 //	        sampleData.add(new ReplaceableAttribute("Private_ip", "127.0.0.1", true));
@@ -117,6 +146,7 @@ public class Manager extends HttpServlet {
 //
 //	        PutAttributesRequest pr = new PutAttributesRequest(myDomain, "Item_01", sampleData);
 //	    	sdb.putAttributes(pr);
+	        
 	        String query = "select * from `" + myDomain + "`";
 	    	SelectRequest selectRequest = new SelectRequest(query);
 	    	SelectResult selectResult = sdb.select(selectRequest);
@@ -129,7 +159,7 @@ public class Manager extends HttpServlet {
 	    			switch (attribute.getName()){
 	    				case "Public_ip":
 	    					public_ip = attribute.getValue();
-	    					System.out.println("Public_ip:  " + attribute.getValue());
+	    					System.out.println("P1Public_ip:  " + attribute.getValue());
 	    					break;
 	    				case "Private_ip":
 	    					private_ip = attribute.getValue();
@@ -181,7 +211,7 @@ public class Manager extends HttpServlet {
 	public void updateForFiveMinutes() {
 		final Runnable up = new Runnable() {
 			public void run() { 
-				System.out.println("Collection executed!!");
+//				System.out.println("Collection executed!!");
 				Date date = new Date();
 				Timestamp now = new Timestamp(date.getTime());
 				Iterator<String> keys = sessionInfo.keySet().iterator();
@@ -207,7 +237,7 @@ public class Manager extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		Cookie[] cookies = request.getCookies();
-		
+		System.out.println("do get");
 		//check it is new user
 		boolean newbee = true;
 		int readable = 0;
@@ -229,6 +259,13 @@ public class Manager extends HttpServlet {
 						 
 //					 		serverList.add(infos[i]);
 					 }
+					 
+					 Collections.shuffle(serverList);
+					 ArrayList<Server> selectedServer = new ArrayList<Server>();
+					 for(int i = 0; i < R; i++){
+						 selectedServer.add(serverList.get(i));
+					 }
+					 
 					 System.out.println("RPC read start");
 					 String fdbk = "";
 					 int counter = 0;

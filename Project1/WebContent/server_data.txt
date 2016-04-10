@@ -1,1 +1,1 @@
-ami-launch-index:  1 TT RebootNum: 2
+ami-launch-index:  0 TT RebootNum: 2

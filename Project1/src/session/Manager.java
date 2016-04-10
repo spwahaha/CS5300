@@ -68,9 +68,9 @@ public class Manager extends HttpServlet {
 	// sessionInfo  key: 
 	public static ConcurrentHashMap<String, Session> sessionInfo = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Integer, Server> serverTable = new ConcurrentHashMap<>();
-    public static final int R = 1;
-    public static final int W = 1;
-    public static final int WQ = 1;
+    public static final int R = 2;
+    public static final int W = 3;
+    public static final int WQ = 3;
     public static int serverId = 0;
     public static int rebootNum = 0;
     public static int sessionCounter = 0;
@@ -117,10 +117,10 @@ public class Manager extends HttpServlet {
 	        
 	        sdb.createDomain(new CreateDomainRequest(myDomain));
 	        List<ReplaceableAttribute> sampleData1 = new ArrayList<ReplaceableAttribute>();
-	        sampleData1.add(new ReplaceableAttribute("Index", "0", true));
-	        sampleData1.add(new ReplaceableAttribute("Private_ip", "127.0.0.1", true));
-	        sampleData1.add(new ReplaceableAttribute("Public_ip", "127.0.0.1", true));
-	        PutAttributesRequest pr = new PutAttributesRequest(myDomain, "Item_00", sampleData1);
+//	        sampleData1.add(new ReplaceableAttribute("Index", "0", true));
+//	        sampleData1.add(new ReplaceableAttribute("Private_ip", "127.0.0.1", true));
+//	        sampleData1.add(new ReplaceableAttribute("Public_ip", "127.0.0.1", true));
+//	        PutAttributesRequest pr = new PutAttributesRequest(myDomain, "Item_00", sampleData1);
 //	        
 //	        List<ReplaceableAttribute> sampleData2 = new ArrayList<ReplaceableAttribute>();
 //	        sampleData2.add(new ReplaceableAttribute("Index", "1", true));
@@ -136,7 +136,7 @@ public class Manager extends HttpServlet {
 //	        
 //	        
 //	        
-	    	sdb.putAttributes(pr);
+//	    	sdb.putAttributes(pr);
 //	    	sdb.putAttributes(pr2);
 //	    	sdb.putAttributes(pr3);
 //	        List<ReplaceableAttribute> sampleData = new ArrayList<ReplaceableAttribute>();
@@ -181,13 +181,13 @@ public class Manager extends HttpServlet {
     
     public void setServerData(){
     	// use the following path when export the war file
-//    	String path = getServletContext().getRealPath("/");
-////    	debugInfo += "  path1:  " + path;
-//    	path += "../server_data.txt";
-////    	debugInfo += "  path2:  " + path;
+    	String path = getServletContext().getRealPath("/");
+//    	debugInfo += "  path1:  " + path;
+    	path += "../server_data.txt";
+//    	debugInfo += "  path2:  " + path;
     	
     	// use the following path when debugging in eclipse
-    	String path = getServletContext().getRealPath("/server_data.txt");
+//    	String path = getServletContext().getRealPath("/server_data.txt");
     	
     	try {
 			BufferedReader br = new BufferedReader(new FileReader(path));

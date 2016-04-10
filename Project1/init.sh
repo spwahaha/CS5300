@@ -8,13 +8,14 @@ LOCAL_IP=0
 PUBLIC_IP=0
 AMI_LAUNCH_INDEX=0
 ItemNum=0
-ServerNum=2
+ServerNum=3
 function initTomcat() {
 	echo $(yum -y install tomcat8-webapps tomcat8-docs-webapp tomcat8-admin-webapps)
 }
 
 function startTomcat(){
 	echo $(service tomcat8 start)
+	echo "tomcat started"
 	# echo $(sudo service tomcat8 stop)
 }
 
@@ -51,7 +52,7 @@ function saveData(){
 		ItemNum=$(aws sdb domain-metadata --domain-name test1 | grep "ItemCount" | sed -E 's/^[^0-9]*([0-9]+).*/\1/')
 	done
 	echo $(aws sdb select --select-expression "select * from test1" > "NodesDB.txt")
-	echo $()
+	# echo $()
 }
 
 function deployJava(){
@@ -70,11 +71,18 @@ function deployWar(){
 	echo "move successfully"
 	echo $(mv /NodesDB.txt ~tomcat/webapps)
 }
+
+function deployWar1(){
+	echo "deploy files"
+	echo $(mv /NodesDB.txt ~tomcat/webapps)
+	echo $(aws s3 cp s3://edu-cornell-cs-cs5300s16-zp55/Project1.war ~tomcat/webapps/Project1.war)
+	echo $(aws s3 cp s3://edu-cornell-cs-cs5300s16-zp55/restart.sh ~tomcat/webapps/restart.sh)
+}
 # echo $(cd ~)
 deployJava
 initTomcat
 initSdb
 insertData
 saveData
+deployWar1
 startTomcat
-deployWar

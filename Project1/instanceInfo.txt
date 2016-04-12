@@ -1,6 +1,6 @@
 {
     "OwnerId": "208580179646", 
-    "ReservationId": "r-377279f2", 
+    "ReservationId": "r-71ada7b4", 
     "Groups": [], 
     "Instances": [
         {
@@ -14,14 +14,14 @@
                 "Name": "pending"
             }, 
             "EbsOptimized": false, 
-            "LaunchTime": "2016-04-10T19:26:57.000Z", 
-            "PrivateIpAddress": "172.31.28.14", 
+            "LaunchTime": "2016-04-12T02:37:20.000Z", 
+            "PrivateIpAddress": "172.31.17.67", 
             "ProductCodes": [], 
             "VpcId": "vpc-d28d78b6", 
             "StateTransitionReason": "", 
-            "InstanceId": "i-7d595aba", 
+            "InstanceId": "i-f2d5d835", 
             "ImageId": "ami-c229c0a2", 
-            "PrivateDnsName": "ip-172-31-28-14.us-west-2.compute.internal", 
+            "PrivateDnsName": "ip-172-31-17-67.us-west-2.compute.internal", 
             "KeyName": "zp01-key-pair-uswest2", 
             "SecurityGroups": [
                 {
@@ -35,25 +35,25 @@
             "NetworkInterfaces": [
                 {
                     "Status": "in-use", 
-                    "MacAddress": "02:32:d1:98:f8:39", 
+                    "MacAddress": "02:ca:bb:f4:d1:bd", 
                     "SourceDestCheck": true, 
                     "VpcId": "vpc-d28d78b6", 
                     "Description": "", 
-                    "NetworkInterfaceId": "eni-ad3f48d6", 
+                    "NetworkInterfaceId": "eni-b77b06cc", 
                     "PrivateIpAddresses": [
                         {
-                            "PrivateDnsName": "ip-172-31-28-14.us-west-2.compute.internal", 
+                            "PrivateDnsName": "ip-172-31-17-67.us-west-2.compute.internal", 
                             "Primary": true, 
-                            "PrivateIpAddress": "172.31.28.14"
+                            "PrivateIpAddress": "172.31.17.67"
                         }
                     ], 
-                    "PrivateDnsName": "ip-172-31-28-14.us-west-2.compute.internal", 
+                    "PrivateDnsName": "ip-172-31-17-67.us-west-2.compute.internal", 
                     "Attachment": {
                         "Status": "attaching", 
                         "DeviceIndex": 0, 
                         "DeleteOnTermination": true, 
-                        "AttachmentId": "eni-attach-d4e03023", 
-                        "AttachTime": "2016-04-10T19:26:57.000Z"
+                        "AttachmentId": "eni-attach-deb66929", 
+                        "AttachTime": "2016-04-12T02:37:20.000Z"
                     }, 
                     "Groups": [
                         {
@@ -63,7 +63,87 @@
                     ], 
                     "SubnetId": "subnet-38c43b5c", 
                     "OwnerId": "208580179646", 
-                    "PrivateIpAddress": "172.31.28.14"
+                    "PrivateIpAddress": "172.31.17.67"
+                }
+            ], 
+            "SourceDestCheck": true, 
+            "Placement": {
+                "Tenancy": "default", 
+                "GroupName": "", 
+                "AvailabilityZone": "us-west-2a"
+            }, 
+            "Hypervisor": "xen", 
+            "BlockDeviceMappings": [], 
+            "Architecture": "x86_64", 
+            "StateReason": {
+                "Message": "pending", 
+                "Code": "pending"
+            }, 
+            "RootDeviceName": "/dev/xvda", 
+            "VirtualizationType": "hvm", 
+            "AmiLaunchIndex": 0
+        }, 
+        {
+            "Monitoring": {
+                "State": "disabled"
+            }, 
+            "PublicDnsName": "", 
+            "RootDeviceType": "ebs", 
+            "State": {
+                "Code": 0, 
+                "Name": "pending"
+            }, 
+            "EbsOptimized": false, 
+            "LaunchTime": "2016-04-12T02:37:20.000Z", 
+            "PrivateIpAddress": "172.31.17.68", 
+            "ProductCodes": [], 
+            "VpcId": "vpc-d28d78b6", 
+            "StateTransitionReason": "", 
+            "InstanceId": "i-f1d5d836", 
+            "ImageId": "ami-c229c0a2", 
+            "PrivateDnsName": "ip-172-31-17-68.us-west-2.compute.internal", 
+            "KeyName": "zp01-key-pair-uswest2", 
+            "SecurityGroups": [
+                {
+                    "GroupName": "zp011st", 
+                    "GroupId": "sg-e3ce7584"
+                }
+            ], 
+            "ClientToken": "", 
+            "SubnetId": "subnet-38c43b5c", 
+            "InstanceType": "t2.micro", 
+            "NetworkInterfaces": [
+                {
+                    "Status": "in-use", 
+                    "MacAddress": "02:b1:6a:e0:f3:ed", 
+                    "SourceDestCheck": true, 
+                    "VpcId": "vpc-d28d78b6", 
+                    "Description": "", 
+                    "NetworkInterfaceId": "eni-b07b06cb", 
+                    "PrivateIpAddresses": [
+                        {
+                            "PrivateDnsName": "ip-172-31-17-68.us-west-2.compute.internal", 
+                            "Primary": true, 
+                            "PrivateIpAddress": "172.31.17.68"
+                        }
+                    ], 
+                    "PrivateDnsName": "ip-172-31-17-68.us-west-2.compute.internal", 
+                    "Attachment": {
+                        "Status": "attaching", 
+                        "DeviceIndex": 0, 
+                        "DeleteOnTermination": true, 
+                        "AttachmentId": "eni-attach-d1b66926", 
+                        "AttachTime": "2016-04-12T02:37:20.000Z"
+                    }, 
+                    "Groups": [
+                        {
+                            "GroupName": "zp011st", 
+                            "GroupId": "sg-e3ce7584"
+                        }
+                    ], 
+                    "SubnetId": "subnet-38c43b5c", 
+                    "OwnerId": "208580179646", 
+                    "PrivateIpAddress": "172.31.17.68"
                 }
             ], 
             "SourceDestCheck": true, 
@@ -94,14 +174,14 @@
                 "Name": "pending"
             }, 
             "EbsOptimized": false, 
-            "LaunchTime": "2016-04-10T19:26:57.000Z", 
-            "PrivateIpAddress": "172.31.28.15", 
+            "LaunchTime": "2016-04-12T02:37:20.000Z", 
+            "PrivateIpAddress": "172.31.17.69", 
             "ProductCodes": [], 
             "VpcId": "vpc-d28d78b6", 
             "StateTransitionReason": "", 
-            "InstanceId": "i-7c595abb", 
+            "InstanceId": "i-f0d5d837", 
             "ImageId": "ami-c229c0a2", 
-            "PrivateDnsName": "ip-172-31-28-15.us-west-2.compute.internal", 
+            "PrivateDnsName": "ip-172-31-17-69.us-west-2.compute.internal", 
             "KeyName": "zp01-key-pair-uswest2", 
             "SecurityGroups": [
                 {
@@ -115,25 +195,25 @@
             "NetworkInterfaces": [
                 {
                     "Status": "in-use", 
-                    "MacAddress": "02:e5:e7:25:59:65", 
+                    "MacAddress": "02:c3:8c:68:d1:39", 
                     "SourceDestCheck": true, 
                     "VpcId": "vpc-d28d78b6", 
                     "Description": "", 
-                    "NetworkInterfaceId": "eni-af3f48d4", 
+                    "NetworkInterfaceId": "eni-b17b06ca", 
                     "PrivateIpAddresses": [
                         {
-                            "PrivateDnsName": "ip-172-31-28-15.us-west-2.compute.internal", 
+                            "PrivateDnsName": "ip-172-31-17-69.us-west-2.compute.internal", 
                             "Primary": true, 
-                            "PrivateIpAddress": "172.31.28.15"
+                            "PrivateIpAddress": "172.31.17.69"
                         }
                     ], 
-                    "PrivateDnsName": "ip-172-31-28-15.us-west-2.compute.internal", 
+                    "PrivateDnsName": "ip-172-31-17-69.us-west-2.compute.internal", 
                     "Attachment": {
                         "Status": "attaching", 
                         "DeviceIndex": 0, 
                         "DeleteOnTermination": true, 
-                        "AttachmentId": "eni-attach-d5e03022", 
-                        "AttachTime": "2016-04-10T19:26:57.000Z"
+                        "AttachmentId": "eni-attach-d0b66927", 
+                        "AttachTime": "2016-04-12T02:37:20.000Z"
                     }, 
                     "Groups": [
                         {
@@ -143,7 +223,7 @@
                     ], 
                     "SubnetId": "subnet-38c43b5c", 
                     "OwnerId": "208580179646", 
-                    "PrivateIpAddress": "172.31.28.15"
+                    "PrivateIpAddress": "172.31.17.69"
                 }
             ], 
             "SourceDestCheck": true, 
@@ -162,86 +242,6 @@
             "RootDeviceName": "/dev/xvda", 
             "VirtualizationType": "hvm", 
             "AmiLaunchIndex": 2
-        }, 
-        {
-            "Monitoring": {
-                "State": "disabled"
-            }, 
-            "PublicDnsName": "", 
-            "RootDeviceType": "ebs", 
-            "State": {
-                "Code": 0, 
-                "Name": "pending"
-            }, 
-            "EbsOptimized": false, 
-            "LaunchTime": "2016-04-10T19:26:57.000Z", 
-            "PrivateIpAddress": "172.31.28.13", 
-            "ProductCodes": [], 
-            "VpcId": "vpc-d28d78b6", 
-            "StateTransitionReason": "", 
-            "InstanceId": "i-7a595abd", 
-            "ImageId": "ami-c229c0a2", 
-            "PrivateDnsName": "ip-172-31-28-13.us-west-2.compute.internal", 
-            "KeyName": "zp01-key-pair-uswest2", 
-            "SecurityGroups": [
-                {
-                    "GroupName": "zp011st", 
-                    "GroupId": "sg-e3ce7584"
-                }
-            ], 
-            "ClientToken": "", 
-            "SubnetId": "subnet-38c43b5c", 
-            "InstanceType": "t2.micro", 
-            "NetworkInterfaces": [
-                {
-                    "Status": "in-use", 
-                    "MacAddress": "02:76:dc:0d:10:6d", 
-                    "SourceDestCheck": true, 
-                    "VpcId": "vpc-d28d78b6", 
-                    "Description": "", 
-                    "NetworkInterfaceId": "eni-ae3f48d5", 
-                    "PrivateIpAddresses": [
-                        {
-                            "PrivateDnsName": "ip-172-31-28-13.us-west-2.compute.internal", 
-                            "Primary": true, 
-                            "PrivateIpAddress": "172.31.28.13"
-                        }
-                    ], 
-                    "PrivateDnsName": "ip-172-31-28-13.us-west-2.compute.internal", 
-                    "Attachment": {
-                        "Status": "attaching", 
-                        "DeviceIndex": 0, 
-                        "DeleteOnTermination": true, 
-                        "AttachmentId": "eni-attach-d7e03020", 
-                        "AttachTime": "2016-04-10T19:26:57.000Z"
-                    }, 
-                    "Groups": [
-                        {
-                            "GroupName": "zp011st", 
-                            "GroupId": "sg-e3ce7584"
-                        }
-                    ], 
-                    "SubnetId": "subnet-38c43b5c", 
-                    "OwnerId": "208580179646", 
-                    "PrivateIpAddress": "172.31.28.13"
-                }
-            ], 
-            "SourceDestCheck": true, 
-            "Placement": {
-                "Tenancy": "default", 
-                "GroupName": "", 
-                "AvailabilityZone": "us-west-2a"
-            }, 
-            "Hypervisor": "xen", 
-            "BlockDeviceMappings": [], 
-            "Architecture": "x86_64", 
-            "StateReason": {
-                "Message": "pending", 
-                "Code": "pending"
-            }, 
-            "RootDeviceName": "/dev/xvda", 
-            "VirtualizationType": "hvm", 
-            "AmiLaunchIndex": 0
         }
     ]
 }

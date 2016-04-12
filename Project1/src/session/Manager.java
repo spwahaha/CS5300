@@ -58,14 +58,16 @@ public class Manager extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Session s;
 	private String metadata = "0";
-	private static final int cookieAge = 60 * 10 * 10;
 //	private static final int sessionAge = 60 * 10 * 10 * 1000;
 	private static final int sessionAge = 60 * 10 * 10;
+	private static final int cookieAge = sessionAge;
+	private static final int delta = 60 * 10;
 	private static final String cookieName = "CS5300PROJ1SESSION";
 	private static final String accessKey = "AKIAIOO6HTOHZF5LG65Q";
 	private static final String secretKey = "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";
 	private static final String cookieDomain = ".bigdata.systems";
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	private static final boolean onAWS = true;
 	// sessionInfo  key: 
 	public static ConcurrentHashMap<String, Session> sessionInfo = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Integer, Server> serverTable = new ConcurrentHashMap<>();
@@ -182,10 +184,15 @@ public class Manager extends HttpServlet {
     
     public void setServerData(){
     	// use the following path when export the war file
-    	String path = getServletContext().getRealPath("/");
-//    	debugInfo += "  path1:  " + path;
-    	path += "../server_data.txt";
-//    	debugInfo += "  path2:  " + path;
+    	String path = getServletContext().getRealPath("/server_data.txt");
+    	if(onAWS){
+        	path = getServletContext().getRealPath("/");
+//        	debugInfo += "  path1:  " + path;
+        	path += "../server_data.txt";
+//        	debugInfo += "  path2:  " + path;
+    	}
+
+
     	
     	// use the following path when debugging in eclipse
 //    	String path = getServletContext().getRealPath("/server_data.txt");
@@ -290,7 +297,7 @@ public class Manager extends HttpServlet {
 //					 }
 					 
 					 String msg = fdbk.split("#")[2];
-					 s = new Session(sId, sVersion + 1, msg, this.sessionAge);
+					 s = new Session(sId, sVersion + 1, msg, sessionAge + delta);
 					 newbee = false;
 				}
 			}
@@ -301,7 +308,7 @@ public class Manager extends HttpServlet {
 		if(newbee != false){
 			String sessionID = getSessionID();
 			int version = 1;
-			s = new Session(sessionID, version, "Hello world", sessionAge); 
+			s = new Session(sessionID, version, "Hello world", sessionAge + delta); 
 			// sessionInfo 
 			String id_ver = s.getSessionId() + "_" + s.getVersion();
 	    }
@@ -349,6 +356,8 @@ public class Manager extends HttpServlet {
 	    	out.println(output);
 			
 	    	sessionCookie.setMaxAge(cookieAge);
+	    	sessionCookie.setDomain(cookieDomain);
+	    	sessionCookie.setPath("/");
 			response.setContentType("text/html"); 
 			System.out.println("cookieValue:  " + sessionCookie.getValue());
 			response.addCookie(sessionCookie);
@@ -388,6 +397,7 @@ public class Manager extends HttpServlet {
     	
 		sessionCookie.setMaxAge(cookieAge);
 		sessionCookie.setDomain(cookieDomain);
+    	sessionCookie.setPath("/");
 		response.setContentType("text/html"); 
 		response.addCookie(sessionCookie);		 	 
 	}
@@ -409,6 +419,7 @@ public class Manager extends HttpServlet {
     	
     	out.println(output);
 		sessionCookie.setDomain(cookieDomain);
+    	sessionCookie.setPath("/");
 		sessionCookie.setMaxAge(0);
 		response.setContentType("text/html"); 
 		response.addCookie(sessionCookie);
@@ -434,6 +445,7 @@ public class Manager extends HttpServlet {
     	
     	sessionCookie.setMaxAge(sessionAge);
 		sessionCookie.setDomain(cookieDomain);
+    	sessionCookie.setPath("/");
 		response.setContentType("text/html"); 
 		response.addCookie(sessionCookie);
 		

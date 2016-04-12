@@ -1,8 +1,10 @@
 package session;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -30,19 +32,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.amazonaws.auth.PropertiesCredentials;
-import com.amazonaws.services.simpledb.AmazonSimpleDB;
-import com.amazonaws.services.simpledb.AmazonSimpleDBClient;
-import com.amazonaws.services.simpledb.model.Attribute;
-import com.amazonaws.services.simpledb.model.BatchPutAttributesRequest;
-import com.amazonaws.services.simpledb.model.CreateDomainRequest;
-import com.amazonaws.services.simpledb.model.DeleteDomainRequest;
-import com.amazonaws.services.simpledb.model.Item;
-import com.amazonaws.services.simpledb.model.PutAttributesRequest;
-import com.amazonaws.services.simpledb.model.ReplaceableAttribute;
-import com.amazonaws.services.simpledb.model.ReplaceableItem;
-import com.amazonaws.services.simpledb.model.SelectRequest;
-import com.amazonaws.services.simpledb.model.SelectResult;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 
 import rpc.RPCclient;
 import rpc.RPCserver;
@@ -108,78 +100,59 @@ public class Manager extends HttpServlet {
      */
     private void initiaServerTable() {
 		// TODO Auto-generated method stub
-    	AmazonSimpleDB sdb;
+    	String path = getServletContext().getRealPath("/NodesDB.txt");
+    	if(onAWS){
+        	path = getServletContext().getRealPath("/");
+//        	debugInfo += "  path1:  " + path;
+        	path += "../NodesDB.txt";
+//        	debugInfo += "  path2:  " + path;
+    	}
+    	String data = readDB(path);
+		JSONObject obj = new JSONObject(data);
+		
+		JSONArray ItemArr = obj.getJSONArray("Items");
+		for (int i = 0; i < ItemArr.length(); i++)
+		{	
+			JSONArray AttrArr = ItemArr.getJSONObject(i).getJSONArray("Attributes");
+			int index = 0;
+			String public_ip = "";
+			String private_ip = "";
+			for(int j = 0; j < AttrArr.length(); j++){
+		    	String name = AttrArr.getJSONObject(j).getString("Name");
+		    	switch(name){
+			    	case "Public_ip":
+						public_ip = AttrArr.getJSONObject(j).getString("Value");
+						System.out.println("P1Public_ip:  " + public_ip);
+						break;
+					case "Private_ip":
+						private_ip = AttrArr.getJSONObject(j).getString("Value");
+						System.out.println("private_ip:  " + private_ip);
+						break;
+					case "Index":
+						index = Integer.parseInt(AttrArr.getJSONObject(j).getString("Value"));
+						System.out.println("index:  " + index);
+					default:
+						break;
+		    	}
+		    }
+			serverTable.put(index, new Server(public_ip, private_ip));
+		}	
+	}
+	private static String readDB(String path) {
+		// TODO Auto-generated method stub
+		String res = "";
 		try {
-			String myDomain = "test1";
-			sdb = new AmazonSimpleDBClient(new PropertiesCredentials(
-			        Manager.class.getResourceAsStream("AwsCredentials.properties")));
-	        sdb.setEndpoint("sdb.us-west-2.amazonaws.com");
-	        // delete the domain first 
-//	        sdb.deleteDomain(new DeleteDomainRequest(myDomain));
-	        // add the localhost to simpledb
-	        
-	        sdb.createDomain(new CreateDomainRequest(myDomain));
-	        List<ReplaceableAttribute> sampleData1 = new ArrayList<ReplaceableAttribute>();
-//	        sampleData1.add(new ReplaceableAttribute("Index", "0", true));
-//	        sampleData1.add(new ReplaceableAttribute("Private_ip", "127.0.0.1", true));
-//	        sampleData1.add(new ReplaceableAttribute("Public_ip", "127.0.0.1", true));
-//	        PutAttributesRequest pr = new PutAttributesRequest(myDomain, "Item_00", sampleData1);
-//	        
-//	        List<ReplaceableAttribute> sampleData2 = new ArrayList<ReplaceableAttribute>();
-//	        sampleData2.add(new ReplaceableAttribute("Index", "1", true));
-//	        sampleData2.add(new ReplaceableAttribute("Private_ip", "10.128.9.67", true));
-//	        sampleData2.add(new ReplaceableAttribute("Public_ip", "10.128.9.67", true));
-//	        PutAttributesRequest pr2 = new PutAttributesRequest(myDomain, "Item_01", sampleData2);
-//	        
-//	        List<ReplaceableAttribute> sampleData3 = new ArrayList<ReplaceableAttribute>();
-//	        sampleData3.add(new ReplaceableAttribute("Index", "2", true));
-//	        sampleData3.add(new ReplaceableAttribute("Private_ip", "10.128.11.166", true));
-//	        sampleData3.add(new ReplaceableAttribute("Public_ip", "10.128.11.166", true));
-//	        PutAttributesRequest pr3 = new PutAttributesRequest(myDomain, "Item_02", sampleData3);
-//	        
-//	        
-//	        
-//	    	sdb.putAttributes(pr);
-//	    	sdb.putAttributes(pr2);
-//	    	sdb.putAttributes(pr3);
-//	        List<ReplaceableAttribute> sampleData = new ArrayList<ReplaceableAttribute>();
-//	        sampleData.add(new ReplaceableAttribute("Index", "1", true));
-//	        sampleData.add(new ReplaceableAttribute("Private_ip", "127.0.0.1", true));
-//	        sampleData.add(new ReplaceableAttribute("Public_ip", "127.0.0.1", true));
-//
-//	        PutAttributesRequest pr = new PutAttributesRequest(myDomain, "Item_01", sampleData);
-//	    	sdb.putAttributes(pr);
-	        
-	        String query = "select * from `" + myDomain + "`";
-	    	SelectRequest selectRequest = new SelectRequest(query);
-	    	SelectResult selectResult = sdb.select(selectRequest);
-	    	List<Item> items = selectResult.getItems();
-	    	for(Item item:items){
-	    		String public_ip = ""; 
-	    		String private_ip = "";
-	    		int index = 0;
-	    		for (Attribute attribute : item.getAttributes()) {
-	    			switch (attribute.getName()){
-	    				case "Public_ip":
-	    					public_ip = attribute.getValue();
-	    					System.out.println("P1Public_ip:  " + attribute.getValue());
-	    					break;
-	    				case "Private_ip":
-	    					private_ip = attribute.getValue();
-	    					break;
-	    				case "Index":
-	    					index = Integer.parseInt(attribute.getValue());
-	    				default:
-	    					break;
-	    			}
-	            }
-	    		serverTable.put(index, new Server(public_ip, private_ip));
-	    	}
+			BufferedReader br = new BufferedReader(new FileReader(path));
+			String line = br.readLine();
+			while(line != null){
+				res += line;
+				line = br.readLine();
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-
+		} 
+		return res;
 	}
     
     public void setServerData(){
@@ -191,8 +164,8 @@ public class Manager extends HttpServlet {
         	path += "../server_data.txt";
 //        	debugInfo += "  path2:  " + path;
     	}
-
-
+    	System.out.println(path);
+    	debugInfo += path;
     	
     	// use the following path when debugging in eclipse
 //    	String path = getServletContext().getRealPath("/server_data.txt");
@@ -200,12 +173,23 @@ public class Manager extends HttpServlet {
     	try {
 			BufferedReader br = new BufferedReader(new FileReader(path));
 			String line = br.readLine();
-			debugInfo += " file content " + line;
+			br.close();
+//			debugInfo += " file content " + line;
 			System.out.println("server data:   " + line);
 			String index = line.split("TT")[0].split(":")[1].trim();
 			String reboot = line.split("TT")[1].split(":")[1].trim();
 			this.rebootNum = Integer.parseInt(reboot);
 			this.serverId = Integer.parseInt(index);
+			
+			// update the reboot number in java
+			System.out.println(path);
+			int updatedRebootNum = this.rebootNum + 1;
+			String outInfo = "ami-launch-index: " + this.serverId + " TT " + " RebootNum: " + updatedRebootNum;
+			File myFoo = new File(path);
+			FileWriter fooWriter = new FileWriter(myFoo, false); // false to overwrite
+			fooWriter.write(outInfo);
+			fooWriter.close();
+			System.out.println(outInfo);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -477,6 +461,7 @@ public class Manager extends HttpServlet {
 			output = output.replace("#timeout#", "");
 			output = output.replace("#begintime#", "");
 		}
+		String serverInfo = "Server ID: " + this.serverId + " Reboot Number:  " + this.rebootNum;
 		return output + debugInfo;
 	}
 

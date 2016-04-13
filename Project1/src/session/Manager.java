@@ -63,9 +63,9 @@ public class Manager extends HttpServlet {
 	// sessionInfo  key: 
 	public static ConcurrentHashMap<String, Session> sessionInfo = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Integer, Server> serverTable = new ConcurrentHashMap<>();
-    public static final int R = 2;
-    public static final int W = 3;
-    public static final int WQ = 2;
+    public static int R = 2;
+    public static int W = 3;
+    public static int WQ = 3;
     public static int serverId = 0;
     public static int rebootNum = 0;
     public static int sessionCounter = 0;
@@ -82,6 +82,7 @@ public class Manager extends HttpServlet {
 	@Override
 	public void init() {
 		System.out.println("P1 Initialization");
+		initParameter();
         updateForFiveMinutes();
         initiaServerTable();
         setServerData();
@@ -94,7 +95,35 @@ public class Manager extends HttpServlet {
 		}
 	}
     
-    /**
+    private void initParameter() {
+		// TODO Auto-generated method stub
+    	String path = getServletContext().getRealPath("/system_info.txt");
+    	if(onAWS){
+        	path = getServletContext().getRealPath("/");
+        	path += "../system_info.txt";
+    	}
+    	
+		BufferedReader br;
+		try {
+			br = new BufferedReader(new FileReader(path));
+			String line = br.readLine();
+			br.close();
+//			debugInfo += " file content " + line;
+			System.out.println("server data:   " + line);
+			String[] twoParts = line.split("__");
+			
+			int N = Integer.parseInt(line.split("__")[0].split(":")[1].trim());
+			int F = Integer.parseInt(line.split("__")[1].split(":")[1].trim());
+			Manager.R = F + 1;
+			Manager.WQ = F + 1;
+			Manager.W = 2 * F + 1;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
      * Get all the server info from the simpleDB
      * and store them in the serverTable
      */
@@ -103,9 +132,7 @@ public class Manager extends HttpServlet {
     	String path = getServletContext().getRealPath("/NodesDB.txt");
     	if(onAWS){
         	path = getServletContext().getRealPath("/");
-//        	debugInfo += "  path1:  " + path;
         	path += "../NodesDB.txt";
-//        	debugInfo += "  path2:  " + path;
     	}
     	String data = readDB(path);
 		JSONObject obj = new JSONObject(data);
@@ -160,15 +187,10 @@ public class Manager extends HttpServlet {
     	String path = getServletContext().getRealPath("/server_data.txt");
     	if(onAWS){
         	path = getServletContext().getRealPath("/");
-//        	debugInfo += "  path1:  " + path;
         	path += "../server_data.txt";
-//        	debugInfo += "  path2:  " + path;
     	}
     	System.out.println(path);
     	debugInfo += path;
-    	
-    	// use the following path when debugging in eclipse
-//    	String path = getServletContext().getRealPath("/server_data.txt");
     	
     	try {
 			BufferedReader br = new BufferedReader(new FileReader(path));
@@ -176,20 +198,20 @@ public class Manager extends HttpServlet {
 			br.close();
 //			debugInfo += " file content " + line;
 			System.out.println("server data:   " + line);
-			String index = line.split("TT")[0].split(":")[1].trim();
-			String reboot = line.split("TT")[1].split(":")[1].trim();
+			String index = line.split("__")[0].split(":")[1].trim();
+			String reboot = line.split("__")[1].split(":")[1].trim();
 			this.rebootNum = Integer.parseInt(reboot);
 			this.serverId = Integer.parseInt(index);
 			
 			// update the reboot number in java
-			System.out.println(path);
-			int updatedRebootNum = this.rebootNum + 1;
-			String outInfo = "ami-launch-index: " + this.serverId + " TT " + " RebootNum: " + updatedRebootNum;
-			File myFoo = new File(path);
-			FileWriter fooWriter = new FileWriter(myFoo, false); // false to overwrite
-			fooWriter.write(outInfo);
-			fooWriter.close();
-			System.out.println(outInfo);
+//			System.out.println(path);
+//			int updatedRebootNum = this.rebootNum + 1;
+//			String outInfo = "ami-launch-index: " + this.serverId + " TT " + " RebootNum: " + updatedRebootNum;
+//			File myFoo = new File(path);
+//			FileWriter fooWriter = new FileWriter(myFoo, false); // false to overwrite
+//			fooWriter.write(outInfo);
+//			fooWriter.close();
+//			System.out.println(outInfo);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

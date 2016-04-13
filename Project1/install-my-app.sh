@@ -8,7 +8,8 @@ LOCAL_IP=0
 PUBLIC_IP=0
 AMI_LAUNCH_INDEX=0
 ItemNum=0
-ServerNum=3
+N=3
+F=1
 function initTomcat() {
 	echo $(yum -y install tomcat8-webapps tomcat8-docs-webapp tomcat8-admin-webapps)
 }
@@ -32,12 +33,14 @@ function insertData(){
 	LOCAL_IP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
 	PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
 	AMI_LAUNCH_INDEX=$(curl http://169.254.169.254/latest/meta-data/ami-launch-index)
-	SERVER_DATA=$"ami-launch-index:  $AMI_LAUNCH_INDEX TT RebootNum: 0"
+	SERVER_DATA=$"ami-launch-index:  $AMI_LAUNCH_INDEX __ RebootNum: 0"
 	echo "$SERVER_DATA">server_data.txt
+	SYSTEM_INFO=$"N: $N __ F:$F"
+	echo "$SYSTEM_INFO">system_info.txt
 	echo $(mv /server_data.txt ~tomcat/webapps)
+	echo $(mv /system_info.txt ~tomcat/webapps)
 	echo "ami-launch-index:  $AMI_LAUNCH_INDEX"
 	echo "ip: $IP"
-	echo $()
 	ATTRIBUTE='[{"Name": "Index","Value": ''"'"$AMI_LAUNCH_INDEX"'"''},{"Name":"Private_ip","Value":''"'"$LOCAL_IP"'"''},{"Name":"Public_ip","Value":''"'"$PUBLIC_IP"'"''}]'
 	echo $ATTRIBUTE
 	echo $(aws sdb put-attributes --domain-name test1 --item-name "item$AMI_LAUNCH_INDEX" --attributes "$ATTRIBUTE")
@@ -46,7 +49,7 @@ function insertData(){
 
 function saveData(){
 	ItemNum=$(aws sdb domain-metadata --domain-name test1 | grep "ItemCount" | sed -E 's/^[^0-9]*([0-9]+).*/\1/')
-	while [[ ! $ItemNum -eq $ServerNum ]]; do
+	while [[ ! $ItemNum -eq $N ]]; do
 		sleep 2
 		ItemNum=$(aws sdb domain-metadata --domain-name test1 | grep "ItemCount" | sed -E 's/^[^0-9]*([0-9]+).*/\1/')
 	done

@@ -9,7 +9,8 @@ INSTANCE_TYPE="t2.micro"
 KEY_NAME="zp01-key-pair-uswest2"
 SECURITY_GROUP="sg-e3ce7584"
 INSTANCE_INFO=""
-N=3
+N=1
+S3_BUCKET="edu-cornell-cs-cs5300s16-zp55"
 function initAWS(){
 	echo $(aws configure set aws_access_key_id $ACCESS_KEY_ID)
 	echo $(aws configure set aws_secret_access_key $SECRET_ACCESS_KEY)
@@ -29,8 +30,9 @@ function initInstance(){
 
 
 function transferFile(){
-	echo $(aws s3 cp Project1.war s3://edu-cornell-cs-cs5300s16-zp55/Project1.war)
-	echo $(aws s3 cp reboot.sh s3://edu-cornell-cs-cs5300s16-zp55/reboot.sh)
+	echo $(aws s3 cp Project1.war s3://$S3_BUCKET/Project1.war)
+	echo $(aws s3 cp reboot.sh s3://$S3_BUCKET/reboot.sh)
+	echo $(aws s3 cp install-my-app.sh s3://$S3_BUCKET/install-my-app.sh)
 }
 
 initAWS

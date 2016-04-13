@@ -1,6 +1,6 @@
 #!/bin/bash
-AMI_LAUNCH_INDEX=$(sed -E 's/^[^0-9]*([0-9]+).*[|]+[^0-9]*([0-9]+).*/\1/' ~tomcat/webapps/server_data.txt)
-REBOOT_NUM=$(sed -E 's/^[^0-9]*[0-9]+.*[|]+[^0-9]*([0-9]+).*/\1/' ~tomcat/webapps/server_data.txt)
+AMI_LAUNCH_INDEX=$(sed -E 's/^[^0-9]*([0-9]+).*[_]+[^0-9]*([0-9]+).*/\1/' ~tomcat/webapps/server_data.txt)
+REBOOT_NUM=$(sed -E 's/^[^0-9]*[0-9]+.*[_]+[^0-9]*([0-9]+).*/\1/' ~tomcat/webapps/server_data.txt)
 REBOOT_NUM=$((10#$REBOOT_NUM + 1))
 echo $REBOOT_NUM
 echo $AMI_LAUNCH_INDEX

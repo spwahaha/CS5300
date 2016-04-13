@@ -25,6 +25,8 @@ public class RPCclient {
 		}
 		// result may exceed maxPacket size 
 		result = s.getBytes();
+		System.out.println("String length:  " +s.length() );
+		System.out.println("byte length:   " + result.length);
 		return result;
 	}
 	
@@ -102,7 +104,12 @@ public class RPCclient {
 		
 		int version = s.getVersion();
 		String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout().getTime() + "#" + s.getMessage() + "#";
-		
+		if(out.length() > 512){
+			int cutLen = out.length() - 512;
+			int preserveLen = s.getMessage().length() - cutLen;
+			s.setMessage(s.getMessage().substring(0, preserveLen));
+		}
+		out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout().getTime() + "#" + s.getMessage() + "#";
 		outbuf = encode(out);
 		boolean done = false;
 		

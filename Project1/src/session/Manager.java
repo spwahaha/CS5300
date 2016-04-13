@@ -190,7 +190,7 @@ public class Manager extends HttpServlet {
         	path += "../server_data.txt";
     	}
     	System.out.println(path);
-    	debugInfo += path;
+//    	debugInfo += path;
     	
     	try {
 			BufferedReader br = new BufferedReader(new FileReader(path));
@@ -330,6 +330,7 @@ public class Manager extends HttpServlet {
 //		Set serverSet = RPCwrite(s);
 		Set<Server> serverSet = getWriteServer(W);
 		metadata = RPCclient.write(s, serverSet);
+		System.out.println(s.getMessage());
 		//metadata = "0";
 		System.out.println("write Result:  " + metadata);
 		// and then put the serverSet info in the cookie info
@@ -434,7 +435,7 @@ public class Manager extends HttpServlet {
 	
 	//if the user press the replace button
 	protected void replace(HttpServletRequest request, HttpServletResponse response, Session s) throws IOException{
-		s.setMessage(request.getParameter("Replace"));
+//		s.setMessage(request.getParameter("Replace"));
 		String id = s.getSessionId();
 		String ver = "" + s.getVersion();
 		String id_ver = id + "_" + ver;

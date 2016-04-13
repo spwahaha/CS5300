@@ -4,7 +4,7 @@
             "Attributes": [
                 {
                     "Name": "Private_ip", 
-                    "Value": "172.31.17.67"
+                    "Value": "127.0.0.1"
                 }, 
                 {
                     "Name": "Index", 
@@ -12,44 +12,11 @@
                 }, 
                 {
                     "Name": "Public_ip", 
-                    "Value": "52.10.192.133"
+                    "Value": "127.0.0.1"
                 }
             ], 
             "Name": "item0"
-        }, 
-        {
-            "Attributes": [
-                {
-                    "Name": "Private_ip", 
-                    "Value": "172.31.17.68"
-                }, 
-                {
-                    "Name": "Index", 
-                    "Value": "1"
-                }, 
-                {
-                    "Name": "Public_ip", 
-                    "Value": "52.33.253.137"
-                }
-            ], 
-            "Name": "item1"
-        }, 
-        {
-            "Attributes": [
-                {
-                    "Name": "Private_ip", 
-                    "Value": "172.31.17.69"
-                }, 
-                {
-                    "Name": "Index", 
-                    "Value": "2"
-                }, 
-                {
-                    "Name": "Public_ip", 
-                    "Value": "52.37.251.22"
-                }
-            ], 
-            "Name": "item2"
         }
+        
     ]
 }

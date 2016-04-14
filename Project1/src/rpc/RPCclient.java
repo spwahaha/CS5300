@@ -89,7 +89,8 @@ public class RPCclient {
 				recvpkt.setLength(inbuf.length);
 				rpcsocket.receive(recvpkt);
 				System.out.println("received one packet from server: " + decode(inbuf));
-				if(decode(inbuf).split("#")[0].equals(callID)){
+				String rcvMsg = decode(inbuf);
+				if(rcvMsg.split("#")[0].equals(callID) && rcvMsg.split("#")[1].equals("true")){
 					System.out.println("success read from other server");
 					break;
 				}

@@ -50,7 +50,7 @@ public class Manager extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Session s;
 	private String metadata = "0";
-	private static final int sessionAge = 60 * 10 * 10;
+	private static final int sessionAge = 60 * 10 * 1000;
 	private static final int cookieAge = sessionAge;
 	private static final int delta = 60 * 10;
 	private static final String cookieName = "CS5300PROJ1SESSION";
@@ -288,7 +288,7 @@ public class Manager extends HttpServlet {
 					 }
 					 Collections.shuffle(serverList);
 					 ArrayList<Server> selectedServer = new ArrayList<Server>();
-					 for(int i = 0; i < R; i++){
+					 for(int i = 0; i < R && i < serverList.size(); i++){
 						 selectedServer.add(serverList.get(i));
 					 }
 					 
@@ -322,7 +322,7 @@ public class Manager extends HttpServlet {
 					  */
 					 String msg = fdbk.split("#")[2];
 					 String successReadServer = fdbk.split("#")[3];
-					 this.ServerInfo += "   read session from server:   " + successReadServer;
+					 this.ServerInfo += "     Read session from server:   " + successReadServer;
 					 s = new Session(sId, sVersion + 1, msg, sessionAge + delta);
 					 newbee = false;
 				}

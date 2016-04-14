@@ -10,11 +10,11 @@ LOCAL_IP=0
 PUBLIC_IP=0
 AMI_LAUNCH_INDEX=0
 ItemNum=0
-N=1
-F=1
+N=6
+F=2
 SUDO=""
 
-# check run by root user or not, add sudo for command non-root user 
+# check run by root user or not, add sudo for command for non-root user 
 if [[ $EUID -ne 0 ]]; then
 	#not root user
 	SUDO="sudo "

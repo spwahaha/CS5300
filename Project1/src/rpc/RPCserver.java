@@ -16,9 +16,9 @@ public class RPCserver extends Thread{
 	private static final int sessionAge = 60 * 10 * 10;
 	
 	public RPCserver() throws IOException{
-//		init();
 		super("RPCserver Thread");
 	}
+	
 	
 	public void run(){
 		try {
@@ -29,6 +29,10 @@ public class RPCserver extends Thread{
 		}
 	}
 	
+	/**
+	 * use while loop to execute RPC server
+	 * @throws IOException
+	 */
 	public void init() throws IOException{
 		DatagramSocket rpcsocket = new DatagramSocket(portPROJ1BRPC);
 		while(true){
@@ -38,18 +42,30 @@ public class RPCserver extends Thread{
 			InetAddress returnaddr = recvpkt.getAddress();
 			int returnport = recvpkt.getPort();
 			
-			//input[0] -> callID, input[1] -> operationcode input[2] -> sessionID input[3] -> version
-			//input[4] -> expire_data input[5] -> message
+			/**
+			 * receive request decode it into string array and 
+			 * the first 4 element in array has the following format
+			 * input[0] -> callID, input[1] -> operationcode 
+			 * input[2] -> sessionID input[3] -> version
+			 * (input[4] -> expire_data input[5] -> message) for write requst 
+			 */
+
 			System.out.println("server received data: " + RPCclient.decode(inbuf));
 			String[] inputs = RPCclient.decode(inbuf).split("#");
-			// callID length might be greater than 1
-			if(inputs[1].length() != 1) continue;
+						
 			
 			String[] output = null;
 			byte[] outbuf = new byte[maxPacket];
 			
 			int operations =  Integer.parseInt(inputs[1]);
 			if( operations == 1){
+				/**
+				 *  read request with operation code: 1
+				 *  read session info, encode session info
+				 *  to byte array and response
+				 *  response format:
+				 *  callID#true/false#sessionMSG(if true)
+				 */
 				System.out.println("read session");
 				
 				output = sessionRead(inputs);
@@ -58,39 +74,51 @@ public class RPCserver extends Thread{
 					System.out.println("read session info:  " + str);
 				}
 				if(output[1].equals("true")){	
-					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#" + output[2] + "#");
+					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#" + output[2] + "#" + 
+								Manager.serverId + "#");
 				}else{
 					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#");
 				}
 			}else if (operations == 2){
+				/**
+				 * write request with operation code 2
+				 * write the session info and response
+				 * response format:
+				 * callID#true#serverID#
+				 */
 				System.out.println("write session");
 				output = sessionWrite(inputs);
 				for(String str : output){
 					System.out.println("output info:  " + str);
 				}
-//				if(output[1].equals("true")){
-					outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#" + output[2] + "#");
-//				}
+				outbuf = RPCclient.encode(output[0] + "#" + output[1] + "#" + output[2] + "#");
 			}
 			
 			DatagramPacket sendPkt = new DatagramPacket(outbuf, outbuf.length, returnaddr, returnport);
 			rpcsocket.send(sendPkt);
 		}
-//		rpcsocket.close();		
 	}
 	
-	//input[0] -> callID, input[1] -> operationcode input[2] -> sessionID input[3] -> version
-	//input[4] -> expire_data input[5] -> message
-	// result[0] callID, result[1] true or false, result[2] data
+
+	/**
+	 * read session info 
+	 * @param in the request info with the following format
+	 * input[0] -> callID, input[1] -> operationcode, 
+	 * input[2] -> sessionID input[3] -> version
+	 * @return the response message with the following format
+	 * result[0] callID, result[1] true or false, result[2] data
+	 */
 	public String[] sessionRead(String[] in){
 
 		String[] result = new String[3];
-		// result[0] callID, result[1] true or false, result[2] data
 		result[0] = in[0];
 		result[1] = "false";
 		if(in.length < 4){
 			return result;
 		}
+		/**
+		 * parse the request and response the correct session info
+		 */
 		String callID = in[0];
 		String sessionID = in[2];
 		String version = in[3];
@@ -108,10 +136,19 @@ public class RPCserver extends Thread{
 		return result;
 	}
 	
-	//result[0]:callID, result[1]:true/false, result[2]:serverID
+	/**
+	 * write session info
+	 * @param in the request info with the following format
+	 * input[0] -> callID, input[1] -> operationcode, input[2] -> sessionID
+	 * input[3] -> version, input[4] -> expire_data input[5] -> message
+	 * @return response info with the following format
+	 * result[0]:callID, result[1]:true/false, result[2]:serverID
+	 */
 	public String[] sessionWrite(String[] in){
-		//in[0]: callID, [1]: operationFlag [2]: sessionID, [3]:versionNum [4]:timeOut [5]: message
-		//String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout() + "#" + s.getMessage();
+
+		/**
+		 * parse the request and response
+		 */
 		for(String str : in){
 			System.out.println("in info:  " + str);
 		}
@@ -119,11 +156,12 @@ public class RPCserver extends Thread{
 		String[] result = new String[3];
 		result[0] = in[0]; // callID
 		result[1] = "false";
+		
 		if(in.length < 6){
+			//the input format is not correct
 			return result;
 		}
 		String sessionID = in[2];
-		//different with read
 		int version = Integer.parseInt(in[3]);
 		Timestamp timout = new Timestamp(Long.parseLong(in[4]));
 		String message = in[5];

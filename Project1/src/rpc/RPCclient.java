@@ -17,19 +17,26 @@ public class RPCclient {
 	public final static int timeout = 2000;
 	public final static int wq = 2;
 
+	/**
+	 * encode the string into byte array
+	 * @param s original string 
+	 * @return encoded byte array
+	 */
 	public static byte[] encode(String s){
 		byte[] result = new byte[maxPacket];
 		
 		if( s == null || s.length() == 0){
 			return result;
 		}
-		// result may exceed maxPacket size 
 		result = s.getBytes();
-		System.out.println("String length:  " +s.length() );
-		System.out.println("byte length:   " + result.length);
 		return result;
 	}
 	
+	/**
+	 * Decode the byte array into original string
+	 * @param b byte array to be decoded
+	 * @return the original string
+	 */
 	public static String decode(byte[] b){
 		String result = new String();
 		
@@ -40,6 +47,14 @@ public class RPCclient {
 		return result;
 	}
 	
+	/**
+	 * RPC read, read session info from dest servers
+	 * @param s the session need to read, use s.id and s.versionNum to read
+	 * @param dest the destination servers to read session info
+	 * @return empty byte array if read failed
+	 * or date with the following format: callerID#true/false#session Msg# useless info
+	 * @throws IOException
+	 */
 	public static String read(Session s, List<Server> dest) throws IOException{
 		// no necessary to use uuid, a counter is just fine
 		System.out.println("rpc read start with server info" + dest);
@@ -49,11 +64,17 @@ public class RPCclient {
 		String result = ""; 
 		
 		byte[] outbuf = new byte[512];
-		// 1 means read operation 
+		/**
+		 * encode the read request
+		 * callID#1(read)#sessionID#versionNum#
+		 */
 		String out = callID + "#1#" + s.getSessionId()+ "#" + s.getVersion() + "#";
-		System.out.println("out info:  " + out);
+//		System.out.println("out info:  " + out);
 		outbuf = encode(out);
 		
+		/**
+		 * send read request to RPC servers using server private ip
+		 */
 		for(Server server : dest){
 			System.out.println("send request to: " + dest);
 			DatagramPacket sendpkt = new DatagramPacket(outbuf, outbuf.length,server.private_ip, server.port);
@@ -75,18 +96,23 @@ public class RPCclient {
 			}
 		}catch(SocketTimeoutException stoe){
 			recvpkt = null;
-		}// here, if its IOException, my retry receive 
+		}
+		/**
+		 * decode the read information to string and return result data
+		 */
 		result = decode(inbuf);
 		rpcsocket.close();
-		System.out.println("read end with result:  " + result);
+//		System.out.println("read end with result:  " + result);
 		return result;
 	}
 	
 	/**
+	 * RPC write, write session info to W servers (WQ success)
 	 * This method should return a list of index of the server that save the session info
-	 * @param s
-	 * @param dest
-	 * @return
+	 * @param s session need to be written
+	 * @param dest destination server to write the session info
+	 * @return return the string containing server index that store the session
+	 * info successfully with the following format£º 0__1__2
 	 * @throws IOException
 	 */
 	public static String write(Session s, Set<Server> dest) throws IOException{
@@ -95,15 +121,17 @@ public class RPCclient {
 		DatagramSocket rpcsocket = new DatagramSocket();
 		rpcsocket.setSoTimeout(timeout);
 		String result = ""; 
-		
 		byte[] outbuf = new byte[maxPacket];
 		
-		// here, not necessary to increase the version number, version number should 
-		// be increased in manager
-//		int version = s.getVersion() + 1; 
-		
+		/**
+		 * encode the write request with the following format
+		 * callID#2(write)#sessionID#versionNum#discardTime#sessionMSG#
+		 */
 		int version = s.getVersion();
 		String out = callID + "#2#" + s.getSessionId()+ "#" + version + "#" + s.getTimeout().getTime() + "#" + s.getMessage() + "#";
+		/**
+		 * cut session message if request string is greater that 512
+		 */
 		if(out.length() > 512){
 			int cutLen = out.length() - 512;
 			int preserveLen = s.getMessage().length() - cutLen;
@@ -113,6 +141,10 @@ public class RPCclient {
 		outbuf = encode(out);
 		boolean done = false;
 		
+		/**
+		 * send write request to RPC servers, the feedback information with 
+		 * following format: callID#true#serverID#
+		 */
 		while(!done){
 			for(Server server : dest){
 				System.out.println("write dest server:  " + server);
@@ -143,14 +175,11 @@ public class RPCclient {
 						break;
 					}
 				}
-//				done = true;
 			}catch(SocketTimeoutException stoe){
 				recvpkt = null;
 			}
-//			result = decode(inbuf);
 		}
 		rpcsocket.close();
-//		return result;
 		
 		return result.substring(2);
 	}

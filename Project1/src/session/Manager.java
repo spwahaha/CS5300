@@ -50,7 +50,6 @@ public class Manager extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Session s;
 	private String metadata = "0";
-//	private static final int sessionAge = 60 * 10 * 10 * 1000;
 	private static final int sessionAge = 60 * 10 * 10;
 	private static final int cookieAge = sessionAge;
 	private static final int delta = 60 * 10;
@@ -58,11 +57,8 @@ public class Manager extends HttpServlet {
 	private static final String accessKey = "AKIAIOO6HTOHZF5LG65Q";
 	private static final String secretKey = "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";
 	private static final String cookieDomain = ".bigdata.systems";
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	private static int GCInterval = 10; // garbage collection interval, unit: second
 	private static final boolean onAWS = true;
-	// sessionInfo  key: 
-	public static ConcurrentHashMap<String, Session> sessionInfo = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<Integer, Server> serverTable = new ConcurrentHashMap<>();
     public static int R = 2;
     public static int W = 3;
     public static int WQ = 3;
@@ -70,6 +66,10 @@ public class Manager extends HttpServlet {
     public static int rebootNum = 0;
     public static int sessionCounter = 0;
     public String debugInfo = "";
+    private String ServerInfo = "";
+	public static ConcurrentHashMap<String, Session> sessionInfo = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Integer, Server> serverTable = new ConcurrentHashMap<>();
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -79,9 +79,17 @@ public class Manager extends HttpServlet {
         // TODO Auto-generated constructor stub
     }
     
+    /**
+     * initialize the servelet
+     * initialize W, WQ, R parameter
+     * start RPC server thread
+     * set the server index and reboot number
+     * start garbage collection thread
+     * parse simpleDB data
+     */
 	@Override
 	public void init() {
-		System.out.println("P1 Initialization");
+//		System.out.println("P1 Initialization");
 		initParameter();
         updateForFiveMinutes();
         initiaServerTable();
@@ -94,9 +102,12 @@ public class Manager extends HttpServlet {
 			e.printStackTrace();
 		}
 	}
-    
+    /**
+     * Initialze W, WQ, R from file, which contains the parameter N and F
+     */
     private void initParameter() {
 		// TODO Auto-generated method stub
+    	// different path on tomcat and local eclipse environment to read file
     	String path = getServletContext().getRealPath("/system_info.txt");
     	if(onAWS){
         	path = getServletContext().getRealPath("/");
@@ -108,10 +119,8 @@ public class Manager extends HttpServlet {
 			br = new BufferedReader(new FileReader(path));
 			String line = br.readLine();
 			br.close();
-//			debugInfo += " file content " + line;
-			System.out.println("server data:   " + line);
+//			System.out.println("server data:   " + line);
 			String[] twoParts = line.split("__");
-			
 			int N = Integer.parseInt(line.split("__")[0].split(":")[1].trim());
 			int F = Integer.parseInt(line.split("__")[1].split(":")[1].trim());
 			Manager.R = F + 1;
@@ -124,7 +133,7 @@ public class Manager extends HttpServlet {
 	}
 
 	/**
-     * Get all the server info from the simpleDB
+     * parse the server info from the simpleDB file
      * and store them in the serverTable
      */
     private void initiaServerTable() {
@@ -165,6 +174,12 @@ public class Manager extends HttpServlet {
 			serverTable.put(index, new Server(public_ip, private_ip));
 		}	
 	}
+    
+    /**
+     * Read the simpleDB file
+     * @param path the path of the simpleDB file
+     * @return the content of the file
+     */
 	private static String readDB(String path) {
 		// TODO Auto-generated method stub
 		String res = "";
@@ -182,6 +197,9 @@ public class Manager extends HttpServlet {
 		return res;
 	}
     
+	/**
+	 * parse the serverId and rebootNumber from file
+	 */
     public void setServerData(){
     	// use the following path when export the war file
     	String path = getServletContext().getRealPath("/server_data.txt");
@@ -189,9 +207,7 @@ public class Manager extends HttpServlet {
         	path = getServletContext().getRealPath("/");
         	path += "../server_data.txt";
     	}
-    	System.out.println(path);
 //    	debugInfo += path;
-    	
     	try {
 			BufferedReader br = new BufferedReader(new FileReader(path));
 			String line = br.readLine();
@@ -202,26 +218,16 @@ public class Manager extends HttpServlet {
 			String reboot = line.split("__")[1].split(":")[1].trim();
 			this.rebootNum = Integer.parseInt(reboot);
 			this.serverId = Integer.parseInt(index);
-			
-			// update the reboot number in java
-//			System.out.println(path);
-//			int updatedRebootNum = this.rebootNum + 1;
-//			String outInfo = "ami-launch-index: " + this.serverId + " TT " + " RebootNum: " + updatedRebootNum;
-//			File myFoo = new File(path);
-//			FileWriter fooWriter = new FileWriter(myFoo, false); // false to overwrite
-//			fooWriter.write(outInfo);
-//			fooWriter.close();
-//			System.out.println(outInfo);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	
-    	
     }
     
 
-	// new thread to automatically check the session timeout
+    /**
+     * start the thread to execute garbage collection in certain time interval
+     */
 	public void updateForFiveMinutes() {
 		final Runnable up = new Runnable() {
 			public void run() { 
@@ -239,7 +245,7 @@ public class Manager extends HttpServlet {
 		};
 		
 		// every five minutes will check the timeout
-		scheduler.scheduleAtFixedRate(up, 5, 5, TimeUnit.SECONDS);
+		scheduler.scheduleAtFixedRate(up, Manager.GCInterval, Manager.GCInterval, TimeUnit.SECONDS);
 		
 	}
     
@@ -250,30 +256,36 @@ public class Manager extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
+		this.ServerInfo = "";
+		this.ServerInfo += "   ServerID:  " + this.serverId;
+		this.ServerInfo += "   RebootNumber:   " + this.rebootNum;
 		Cookie[] cookies = request.getCookies();
 		System.out.println("do get");
 		//check it is new user
 		boolean newbee = true;
 		int readable = 0;
+		/**
+		 * handle the case that request with cookies 
+		 */
 		if(cookies != null){
 			for(Cookie cookie : cookies){
-//				if(cookie.getName().equals(cookieName) && cookie.getDomain() != null && cookie.getDomain().equals(cookieDomain)){
 				if(cookie.getName().equals(cookieName)){
 					System.out.println(cookie.getValue());
+					/**
+					 * here we need to parse the cookie value and get the session info
+					 */
 					String[] infos = cookie.getValue().split("__");
 					String sId = cookie.getValue().split("__")[0];
 					int sVersion = Integer.parseInt(cookie.getValue().split("__")[1]);
 					String id_ver = sId + "_" + sVersion;
 					/**
-					 * here we need to parse the cookie value and get the session info
+					 * choose R servers from metadata randomly and send read 
+					 * session request
 					 */
 					 ArrayList<Server> serverList= new ArrayList<Server>();
 					 for(int i = 2; i < infos.length; i++){
 						 serverList.add(serverTable.get(Integer.parseInt(infos[i])));
-						 
-//					 		serverList.add(infos[i]);
 					 }
-					 
 					 Collections.shuffle(serverList);
 					 ArrayList<Server> selectedServer = new ArrayList<Server>();
 					 for(int i = 0; i < R; i++){
@@ -287,30 +299,40 @@ public class Manager extends HttpServlet {
 						 counter++;
 						 fdbk = RPCclient.read(new Session(sId, sVersion), serverList);
 					 }while(fdbk.split("#").length < 1 && counter < 3);
+					 
+					 
+					 /**
+					  * parse the read info and to see the session is timeouted 
+					  * or read failed 
+					  */
 					 if(counter >= 3|| fdbk.split("#").length < 2){
 						readable = 1;
 						break;
 					 }
+					 
 					 System.out.print("RPC read end with info: " + fdbk);
 					 if(fdbk.split("#")[1].equals("false")){
 						 readable = 2;
 						 break;
 					 }
 					 
-//					 String success = fdbk.split("#")[1];
-//					 if(success.equals("false")){
-//						 break;
-//					 }
-					 
+					 /**
+					  * deseriliaze the session info and construct session object
+					  * construct session with now() + sessionAge + delta as timeout
+					  */
 					 String msg = fdbk.split("#")[2];
+					 String successReadServer = fdbk.split("#")[3];
+					 this.ServerInfo += "   read session from server:   " + successReadServer;
 					 s = new Session(sId, sVersion + 1, msg, sessionAge + delta);
 					 newbee = false;
 				}
 			}
 		}
 		
-		// This is a new user, the server will generate a new session
-		
+		/**
+		 * No session is found based on user cookies
+		 * so, construct session object with default message
+		 */
 		if(newbee != false){
 			String sessionID = getSessionID();
 			int version = 1;
@@ -322,36 +344,42 @@ public class Manager extends HttpServlet {
 
 		Map<String, String[]> map = request.getParameterMap();
 		
+		/**
+		 * replace the session msg if the request is replace msg
+		 */
 		if(map.containsKey("Replace")){
 			s.setMessage(request.getParameter("Replace"));
 	    }
 		
-// 		we can put the RPC write code here, 
-//		Set serverSet = RPCwrite(s);
+		/**
+		 * choose W random servers to write the session info
+		 * and get the index of WQ servers's index that stored
+		 * teh session info successfully, serialize and store 
+		 * the index info into metadata
+		 */
 		Set<Server> serverSet = getWriteServer(W);
 		metadata = RPCclient.write(s, serverSet);
 		System.out.println(s.getMessage());
-		//metadata = "0";
 		System.out.println("write Result:  " + metadata);
-		// and then put the serverSet info in the cookie info
-		
-		//check what button the user has pressed
+
+		/**
+		 * response user with different request
+		 */
 		if(map.containsKey("refresh")){
-			
 	    	update(request,response,s);
 	    }else if(map.containsKey("logout")){
-	    	
 	    	logout(request,response,s);
 	    }else if(map.containsKey("Replace")){
-	    	
-	    	replace(request,response,s);
+	    	update(request,response,s);
 	    }else{
+	    	
+	    	/**
+	    	 * when the user doesn't send the above three request
+	    	 */
 	    	PrintWriter out = response.getWriter();
 	    	String output = readFile(s); 
-	    
 	    	Cookie sessionCookie = new Cookie(cookieName, s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
 	    	
-	    	//show we cannot find the session
 	    	if(readable == 1){
 	    		output = output.replace("#cookieId#", "The session time out " + "#cookieId#");
 	    	}
@@ -371,12 +399,21 @@ public class Manager extends HttpServlet {
 	    }
 	}
 	
+	/**
+	 * Generate the sessionId according to the <serverId, rebootNum, counter> rule
+	 * @return the generated sessionId
+	 */
 	private String getSessionID(){
 		String sessionId = this.serverId + "-" + this.rebootNum + "-" + this.sessionCounter;
 		this.sessionCounter++;
 		return sessionId;
 	}
 	
+	/**
+	 * Get num servers randomly
+	 * @param num the number of server to write
+	 * @return a set of server to write session Info
+	 */
 	private Set<Server> getWriteServer(int num) {
 		// TODO Auto-generated method stub
 		Set<Server> serverSet = new HashSet<Server>();
@@ -386,22 +423,27 @@ public class Manager extends HttpServlet {
 			Server randomServer = (Server)values[generator.nextInt(values.length)];
 			serverSet.add(randomServer);
 		}
-		
-//		serverSet.add(serverTable.get(0));
 		return serverSet;
 	}
 
-	//if the user press the refresh button
-	protected void update(HttpServletRequest request, HttpServletResponse response, Session s) throws IOException{
+	/**
+	 * handle the refresh request
+	 * @param request
+	 * @param response
+	 * @param s session info to update
+	 * @throws IOException
+	 */
+	private void update(HttpServletRequest request, HttpServletResponse response, Session s) throws IOException{
 	 	PrintWriter out = response.getWriter();
     	String output = readFile(s); 
-    	
-    	
+
     	Cookie sessionCookie = new Cookie(cookieName, s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
     	
     	output = output.replace("#cookieId#", sessionCookie.getValue());
     	out.println(output);
-    	
+    	/**
+    	 * set cookie age, domain, path and send response with cookie 
+    	 */
 		sessionCookie.setMaxAge(cookieAge);
 		sessionCookie.setDomain(cookieDomain);
     	sessionCookie.setPath("/");
@@ -409,8 +451,14 @@ public class Manager extends HttpServlet {
 		response.addCookie(sessionCookie);		 	 
 	}
 	
-	//if the user press the logout button
-	protected void logout(HttpServletRequest request, HttpServletResponse response, Session s) throws IOException{
+	/**
+	 * handle logout request
+	 * @param request
+	 * @param response
+	 * @param s 
+	 * @throws IOException
+	 */
+	private void logout(HttpServletRequest request, HttpServletResponse response, Session s) throws IOException{
 		String id = s.getSessionId();
 		String ver = ""+s.getVersion();
 		String id_ver = id + "_" + ver;
@@ -433,32 +481,38 @@ public class Manager extends HttpServlet {
 		
 	}
 	
-	//if the user press the replace button
-	protected void replace(HttpServletRequest request, HttpServletResponse response, Session s) throws IOException{
-//		s.setMessage(request.getParameter("Replace"));
-		String id = s.getSessionId();
-		String ver = "" + s.getVersion();
-		String id_ver = id + "_" + ver;
-//		sessionInfo.get(id_ver).setMessage(s.getMessage());
-		
-		String output = readFile(s); 
-    	
-		Cookie sessionCookie = new Cookie(cookieName, s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
-    	
-		output = output.replace("#cookieId#", sessionCookie.getValue());
-    	
-    	PrintWriter out = response.getWriter();
-    	out.println(output);
-    	
-    	sessionCookie.setMaxAge(sessionAge);
-		sessionCookie.setDomain(cookieDomain);
-    	sessionCookie.setPath("/");
-		response.setContentType("text/html"); 
-		response.addCookie(sessionCookie);
-		
-	}
+	/**
+	 * handle replace 
+	 * @param request
+	 * @param response
+	 * @param s
+	 * @throws IOException
+	 */
+//	private void replace(HttpServletRequest request, HttpServletResponse response, Session s) throws IOException{
+//
+//		String output = readFile(s); 
+//    	
+//		Cookie sessionCookie = new Cookie(cookieName, s.getSessionId() + "__" + s.getVersion() + "__" + metadata);
+//    	
+//		output = output.replace("#cookieId#", sessionCookie.getValue());
+//    	
+//    	PrintWriter out = response.getWriter();
+//    	out.println(output);
+//    	
+//    	sessionCookie.setMaxAge(sessionAge);
+//		sessionCookie.setDomain(cookieDomain);
+//    	sessionCookie.setPath("/");
+//		response.setContentType("text/html"); 
+//		response.addCookie(sessionCookie);
+//		
+//	}
 	
-	//read the html file
+	/**
+	 * Read the template response
+	 * @param session session info that need to set in the response
+	 * @return the response content
+	 * @throws IOException
+	 */
 	protected String readFile(Session session) throws IOException{
 		
 		String output = new String();
@@ -484,8 +538,9 @@ public class Manager extends HttpServlet {
 			output = output.replace("#timeout#", "");
 			output = output.replace("#begintime#", "");
 		}
-		String serverInfo = "Server ID: " + this.serverId + " Reboot Number:  " + this.rebootNum;
-		return output + debugInfo;
+//		String serverInfo = "Server ID: " + this.serverId + " Reboot Number:  " + this.rebootNum;
+		output += this.ServerInfo;
+		return output;
 	}
 
 	/**

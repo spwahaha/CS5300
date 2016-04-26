@@ -16,7 +16,7 @@ public class PageRankReducer extends Reducer<IntWritable, NodeOrDouble, IntWrita
 	    RunningJob parentJob = 
 	        client.getJob(JobID.forName( conf.get("mapred.job.id") ));
 	    nodeNum = parentJob.getCounters().getCounter(Counter.counters.GLOBALNODE);
-	    System.out.println("Node Number: " + nodeNum);
+	    //System.out.println("Node Number: " + nodeNum);
 	}
 	
 	public void reduce(IntWritable key, Iterable<NodeOrDouble> values, Context context) throws IOException, InterruptedException{

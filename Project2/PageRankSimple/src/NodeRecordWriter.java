@@ -18,7 +18,7 @@ public class NodeRecordWriter extends RecordWriter<IntWritable, Node> {
     }
 
     public synchronized void write(IntWritable key, Node value) throws IOException {
-        System.out.println("");
+        //System.out.println("");
             boolean keyNull   = key == null;
             boolean valueNull = value == null;
             
@@ -35,7 +35,7 @@ public class NodeRecordWriter extends RecordWriter<IntWritable, Node> {
                 outGoing += n.toString() + ",";
             }
             if(!outGoing.equals("")) nodeRep += outGoing.substring(0,outGoing.length()-1); //If there are outgoing nodes, we need to get rid of the trailing comma
-            System.out.println(nodeRep.trim() + " IN THIS PLACE \n");
+            //System.out.println(nodeRep.trim() + " IN THIS PLACE \n");
             out.writeBytes(nodeRep.trim() + "\n");//And write out the resulting record!
             out.flush();
     }

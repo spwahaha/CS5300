@@ -17,7 +17,7 @@ public class PageRankMapper extends Mapper<IntWritable, Node, IntWritable, NodeO
 				context.write(new IntWritable(out), new NodeOrDouble(emitRank));
 			}
 		}
-		System.out.println("Page Rank Mapper : " + key);
+		//System.out.println("Page Rank Mapper : " + key);
 	}
 
 }

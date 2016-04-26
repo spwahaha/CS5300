@@ -75,7 +75,7 @@ public class PreProcess {
 	private static void preProcess() throws IOException{
 		String fileName = "/filterd.txt";
 		int source = 0;
-		System.out.println("preprocess");
+		//System.out.println("preprocess");
 		String neighbor = " ";
 		BufferedReader br = new BufferedReader(new FileReader(path + fileName));
 		BufferedWriter bw = new BufferedWriter(new FileWriter(path + "/preProcessed.txt"));

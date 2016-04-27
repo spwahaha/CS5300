@@ -14,6 +14,7 @@ import org.apache.hadoop.mapreduce.Mapper.Context;
 
 public class RandomBlockedMapper extends Mapper<LongWritable, Text, LongWritable, Text>{
 	long nodeNum = 685230;
+	long blkNum = 68;
 	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException{
 		StringTokenizer st = new StringTokenizer(value.toString(), " ,\t");
 		int sid = Integer.parseInt(st.nextToken());
@@ -41,7 +42,7 @@ public class RandomBlockedMapper extends Mapper<LongWritable, Text, LongWritable
 	
 	
 	private int blockIDofNode(long nodeID){
-		return (int)((nodeID + "").hashCode() / nodeNum);
+		return (int)((nodeID + "").hashCode() / blkNum);
 		
 	}
 }

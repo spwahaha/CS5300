@@ -20,7 +20,7 @@ Our Cookie format: SessID_version_SvrID1_SvrID2_..._SvrIDWQ
 2. **PageRank**: this is the main part of the project. It starts a MapReduce job for each pass. These MapReduce jobs will then call the Map function and Reduce function.
 3. **Map**: Map function will parse the input data and transfer the output to Reduce.
 4. **Reduce**: Reduce function will calculate the new PageRank value and other information (i.e. highest rank node in each block) and produce output to Map for next pass.
-5. **PRCounter**: This is a Hadoop counter. It will transfer the results from Reduce to our main part PageRank. In block implementation, we also create blockCounter in each block so that we can get the highest rank node in each block.
+5. **Counter**: This is a Hadoop counter. It will transfer the results from Reduce to our main part PageRank. In block implementation, we also create blockCounter in each block so that we can get the highest rank node in each block.
 
 #### 1. Input Data Preprocess
 

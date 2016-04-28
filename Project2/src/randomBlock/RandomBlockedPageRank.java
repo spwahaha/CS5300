@@ -14,7 +14,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class RandomBlockedPageRank {
 	
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException{
-		int iterationNum = 10;
+		int iterationNum = 30;
 		double residuals = 0;
 		int i = 0;
 		for(i = 0; i < iterationNum; i++){

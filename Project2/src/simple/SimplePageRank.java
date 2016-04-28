@@ -15,7 +15,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class SimplePageRank {
 	
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException{
-		int iterationNum = 5;
+		int iterationNum = 30;
 		double residuals = 0;
 		int cnt = 0;
 		for(cnt = 0; cnt < iterationNum; cnt++){
@@ -62,9 +62,9 @@ public class SimplePageRank {
 	        System.out.println("Total number of nodes is: " + NodeNum);
             job.getCounters().findCounter(Counter.counters.GLOBALNODE).setValue(0);
             job.getCounters().findCounter(Counter.counters.RESIDUALS).setValue(0);
-//            if(residuals < 0.001){
-//            	break;
-//            }
+            if(residuals < 0.001){
+            	break;
+            }
 		}
 		
 		System.out.println("The residuals after " + cnt + " iterations is " + residuals);

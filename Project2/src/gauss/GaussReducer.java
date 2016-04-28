@@ -73,7 +73,7 @@ public class GaussReducer extends Reducer<LongWritable, Text, LongWritable, Text
 //			System.out.println("loop num: " + cnt +" residuals: " + residual);
 			if(residual < 0.001) break;
 		}
-		System.out.println("loop number: " + cnt);
+//		System.out.println("loop number: " + cnt);
 		context.getCounter(Counter.counters.LOOPNUM).increment(cnt);
 		context.getCounter(Counter.counters.BLOCKNUM).increment(1);
 		double residual = 0;
@@ -112,16 +112,18 @@ public class GaussReducer extends Reducer<LongWritable, Text, LongWritable, Text
 		}
 		double residuals = 0;
 		int cnt = 0;
-		for(Integer did : blockStruct.keySet()){
+		for(Integer did : nodeTable.keySet()){
 			cnt++;
 			List<Integer> sids = blockStruct.get(did);
 			double NPR = 0;
 			// for each source node within the same block
-			for(Integer sid : sids){
-				Integer degree = nodeTable.get(sid).size() - 2;
-				NPR += PRtable.get(sid) / degree;
+			if(sids != null){
+				for(Integer sid : sids){
+					Integer degree = nodeTable.get(sid).size() - 2;
+					NPR += PRtable.get(sid) / degree;
+				}
 			}
-			
+
 			List<Double> PRS = boundaryTable.get(did);
 			if(PRS != null){
 				for(double PR : PRS){

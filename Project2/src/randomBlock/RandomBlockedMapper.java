@@ -42,7 +42,7 @@ public class RandomBlockedMapper extends Mapper<LongWritable, Text, LongWritable
 	
 	
 	private int blockIDofNode(long nodeID){
-		return (int)((nodeID + "").hashCode() / blkNum);
-		
+		return (int)((nodeID + "").hashCode() % blkNum);
+//		return (int)nodeID;
 	}
 }

@@ -21,19 +21,27 @@ public class SimplePageRank {
 		for(cnt = 0; cnt < iterationNum; cnt++){
 			residuals = 0;
 			Configuration conf = new Configuration();
-			File[] files = new File("input/").listFiles();
+//			File[] files = new File("input/").listFiles();
+//			String inputPath = null;
+//			if(cnt == 0){
+//				for(File file : files){
+//					inputPath = file.getPath();
+//					System.out.println("Use this input file: " + inputPath);
+//					break;
+//				}
+//			}else{
+//				inputPath = "stage" + (cnt - 1);
+//			}
+//			
+//			String outputPath = "stage" + cnt;
+			
 			String inputPath = null;
 			if(cnt == 0){
-				for(File file : files){
-					inputPath = file.getPath();
-					System.out.println("Use this input file: " + inputPath);
-					break;
-				}
+				inputPath = args[0];
 			}else{
-				inputPath = "stage" + (cnt - 1);
-			}
-			
-			String outputPath = "stage" + cnt;
+				inputPath = args[1] + "/stage" + (cnt - 1);
+			}			
+			String outputPath = args[1] + "/stage" + cnt;
 			
 			Job job = new Job(conf, "Simple Page Rank");
 			

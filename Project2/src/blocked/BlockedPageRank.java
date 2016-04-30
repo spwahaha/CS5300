@@ -30,10 +30,16 @@ public class BlockedPageRank {
 //			}else{
 //				inputPath = "stage" + (i - 1);
 //			}
-			String inputPath = i == 0 ? args[0] : args[1] + "/stage" + (i - 1);
-			
+//			System.out.print(args.length);
+			String inputPath = null;
+			if(i == 0){
+				inputPath = args[0];
+			}else{
+				inputPath = args[1] + "/stage" + (i - 1);
+			}			
 			String outputPath = args[1] + "/stage" + i;
-			
+//			String inputPath = i == 0 ? args[0] : args[1] + "/stage" + (i - 1);
+//			System.out.println("input: " + inputPath + "output: " + outputPath);
 			Job job = new Job(conf, "Simple Page Rank");
 			
 			job.setJarByClass(BlockedPageRank.class);

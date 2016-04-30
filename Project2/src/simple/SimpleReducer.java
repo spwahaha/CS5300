@@ -15,7 +15,6 @@ public class SimpleReducer extends Reducer<LongWritable, Text, LongWritable, Tex
 //		System.out.println("reducer:  "+key);
 		double d = 0.85;
 		int nodeNum = 685230;
-		nodeNum = 3;
 		ArrayList<String> nodeinfos = new ArrayList<String>();
 		double sum = 0;
 		for(Text text : values){

@@ -9,7 +9,7 @@ INSTANCE_TYPE="t2.micro"
 KEY_NAME="zp01-key-pair-uswest2"
 SECURITY_GROUP="sg-e3ce7584"
 INSTANCE_INFO=""
-N=6
+N=3
 S3_BUCKET="edu-cornell-cs-cs5300s16-zp55"
 function initAWS(){
 	echo $(aws configure set aws_access_key_id $ACCESS_KEY_ID)

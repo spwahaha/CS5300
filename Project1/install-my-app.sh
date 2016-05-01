@@ -10,8 +10,8 @@ LOCAL_IP=0
 PUBLIC_IP=0
 AMI_LAUNCH_INDEX=0
 ItemNum=0
-N=6
-F=2
+N=3
+F=1
 SUDO=""
 
 # check run by root user or not, add sudo for command for non-root user 

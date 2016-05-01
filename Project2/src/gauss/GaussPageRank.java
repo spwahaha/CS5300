@@ -20,19 +20,6 @@ public class GaussPageRank {
 		for(i = 0; i < iterationNum; i++){
 			residuals = 0;
 			Configuration conf = new Configuration();
-			File[] files = new File("input/").listFiles();
-//			String inputPath = null;
-//			if(i == 0){
-//				for(File file : files){
-//					inputPath = file.getPath();
-//					System.out.println("Use this input file: " + inputPath);
-//					break;
-//				}
-//			}else{
-//				inputPath = "stage" + (i - 1);
-//			}
-//			
-//			String outputPath = "stage" + i;
 			
 			String inputPath = null;
 			if(i == 0){

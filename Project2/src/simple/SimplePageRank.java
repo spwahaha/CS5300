@@ -21,19 +21,6 @@ public class SimplePageRank {
 		for(cnt = 0; cnt < iterationNum; cnt++){
 			residuals = 0;
 			Configuration conf = new Configuration();
-//			File[] files = new File("input/").listFiles();
-//			String inputPath = null;
-//			if(cnt == 0){
-//				for(File file : files){
-//					inputPath = file.getPath();
-//					System.out.println("Use this input file: " + inputPath);
-//					break;
-//				}
-//			}else{
-//				inputPath = "stage" + (cnt - 1);
-//			}
-//			
-//			String outputPath = "stage" + cnt;
 			
 			String inputPath = null;
 			if(cnt == 0){
@@ -54,9 +41,6 @@ public class SimplePageRank {
 	        
 	        job.setOutputKeyClass(LongWritable.class);
 	        job.setOutputValueClass(Text.class);
-//	        
-//	        job.setInputFormatClass(NodeInputFormat.class);
-//	        job.setOutputFormatClass(NodeOutputFormat.class);
 	        
 	        FileInputFormat.addInputPath(job, new Path(inputPath));
 	        FileOutputFormat.setOutputPath(job, new Path(outputPath));

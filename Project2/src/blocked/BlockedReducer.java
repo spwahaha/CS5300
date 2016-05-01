@@ -33,7 +33,7 @@ public class BlockedReducer extends Reducer<LongWritable, Text, LongWritable, Te
 			String syb = st.nextToken();
 //			System.out.println(text.toString());
 			if(syb.equals("node")){
-				// this is a node and parse node info
+				// this is a node and parse node info, parse node info
 				ArrayList<String> nodeInfo = new ArrayList<String>();
 				while(st.hasMoreTokens()){
 					nodeInfo.add(st.nextToken());
@@ -104,7 +104,10 @@ public class BlockedReducer extends Reducer<LongWritable, Text, LongWritable, Te
 	}
 	
 	
-	
+	/**
+	 * iterate once the block
+	 * @return the residual of after iterate once
+	 */
 	private double BlockIterateOnce(){
 		Hashtable<Integer, Double> OPR = new Hashtable<Integer, Double>();
 		for(Integer nid : PRtable.keySet()){

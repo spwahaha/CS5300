@@ -2,8 +2,8 @@
 
 # if this is executed when instance just boots, do not need "sudo"
 
-ACCESS_KEY_ID="AKIAIOO6HTOHZF5LG65Q"
-SECRET_ACCESS_KEY="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"
+ACCESS_KEY_ID="XXX"
+SECRET_ACCESS_KEY="XXX"
 S3_BUCKET="edu-cornell-cs-cs5300s16-zp55"
 DOMAIN_NAME="test1"
 LOCAL_IP=0

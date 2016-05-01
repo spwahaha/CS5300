@@ -2,8 +2,8 @@
 
 # if this is executed when instance just boots, do not need "sudo"
 
-ACCESS_KEY_ID="AKIAIOO6HTOHZF5LG65Q"
-SECRET_ACCESS_KEY="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"
+ACCESS_KEY_ID="XXX"
+SECRET_ACCESS_KEY="XXX"
 IMAGE_ID="ami-c229c0a2"
 INSTANCE_TYPE="t2.micro"
 KEY_NAME="zp01-key-pair-uswest2"
